@@ -18,23 +18,34 @@ const Schema = mongoose.Schema;
 
 const MediaSchema = new Schema({
   title: { type : String, default : '', trim : true },
+  year: { type : String, default : '', trim : true },
+  released: { type : String, default : '', trim : true },
+  runtime: { type : String, default : '', trim : true },
+  genre: { type : String, default : '', trim : true },
+  director: { type : String, default : '', trim : true },
+  writer: { type : String, default : '', trim : true },
+  actors: { type : String, default : '', trim : true },
+  plot: { type : String, default : '', trim : true },
+  language: { type : String, default : '', trim : true },
   description: { type : String, default : '', trim : true },
-  tags: { type: []},
+  poster: { type : String, default : '', trim : true },
+  imdbRating: { type : String, default : '', trim : true },
+  type:String,
   downloads:Number,
   link:String,
-  image: {
-    cdnUri: String,
-    file: String
-  },
-  createdAt  : { type : Date, default : Date.now }
+  createdAt:{ type : Date, default : Date.now },
+  location:String,
+  size:Number,
+  blksize:Number,
+  birthtime:String
 });
 
 /**
  * Validations
  */
 
-MediaSchema.path('title').required(true, 'Media title cannot be blank');
-MediaSchema.path('tags').required(true, 'Media tags cannot be blank');
+MediaSchema.path('title').required(true, 'Media Title cannot be blank');
+MediaSchema.path('location').required(true, 'Media Location on disk cant be null');
 
 /**
  * Pre-remove hook
@@ -45,6 +56,24 @@ MediaSchema.pre('remove', function (next) {
   // ask for admin password
   next();
 });
+
+/**
+ * private methods
+ */
+export function download(image_url,image_path){
+  return new Promise((resolve,reject)=>{
+      request
+      .get(image_url)
+      .on('response',(response) => {
+        resolve(response.headers['content-type']);
+      })
+      .on('error', function(err) {
+        reject(err);
+        throw new Error(err.toString);
+      })
+      .pipe(fs.createWriteStream(image_path));
+    });
+}
 
 /**
  * Methods
@@ -58,9 +87,13 @@ MediaSchema.methods = {
    * @api private
    */
   validateAndSave: function () {
-    const err = this.validateSync();
-    if (err && err.toString()) throw new Error(err.toString());
-    return this.save();
+    try{
+      const err = this.validateSync();
+      if (err && err.toString()) throw new Error(err.toString());
+      return this.save();
+    }catch(error){
+      console.log(error);
+    }
   },
    /**
    * Find Media by id
@@ -75,14 +108,11 @@ MediaSchema.methods = {
   },
 
   downloadSaveImage: function(){
-    let image_path = path('../images',this.name,'.png')
-    request
-    .get(this.image_url)
-    .on('response',() => {this.image.file = image_path})
-    .on('error', function(err) {
-      console.log(err)
-    })
-    .pipe(fs.createWriteStream(image_path));
+    let dir = '/home/allan/tv-engine/images';
+    let ext = path.extname(this.poster);
+    let image_path = path.join(dir,this.title,ext)
+    this.poster = image_path;
+    download(this.poster,image_path);
   },
 
   /**
@@ -102,4 +132,6 @@ MediaSchema.methods = {
   }
 };
 
-mongoose.model('Media', MediaSchema);
+const Media = mongoose.model('Media', MediaSchema);
+
+export default Media;
