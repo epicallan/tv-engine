@@ -6,8 +6,8 @@
 import request from 'request';
 import fs from 'fs';
 import path from 'path';
-
-const mongoose = require('mongoose');
+import uniqueValidator from 'mongoose-unique-validator';
+import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
@@ -17,7 +17,7 @@ const Schema = mongoose.Schema;
  */
 
 const MediaSchema = new Schema({
-  title: { type : String, default : '', trim : true },
+  title: { type : String, default : '', trim : true, unique: true  },
   year: { type : String, default : '', trim : true },
   released: { type : String, default : '', trim : true },
   runtime: { type : String, default : '', trim : true },
@@ -28,7 +28,8 @@ const MediaSchema = new Schema({
   plot: { type : String, default : '', trim : true },
   language: { type : String, default : '', trim : true },
   description: { type : String, default : '', trim : true },
-  poster: { type : String, default : '', trim : true },
+  poster: { type : String, default : '', trim : true, unique: true  },
+  image: { type : String, default : '', trim : true },
   imdbRating: { type : String, default : '', trim : true },
   type:String,
   downloads:Number,
@@ -43,9 +44,9 @@ const MediaSchema = new Schema({
 /**
  * Validations
  */
-
+MediaSchema.plugin(uniqueValidator);
 MediaSchema.path('title').required(true, 'Media Title cannot be blank');
-MediaSchema.path('location').required(true, 'Media Location on disk cant be null');
+MediaSchema.path('location').required(true, 'Media Location on disk cannot be null');
 
 /**
  * Pre-remove hook
@@ -110,8 +111,8 @@ MediaSchema.methods = {
   downloadSaveImage: function(){
     let dir = '/home/allan/tv-engine/images';
     let ext = path.extname(this.poster);
-    let image_path = path.join(dir,this.title,ext)
-    this.poster = image_path;
+    let image_path = path.join(dir,this.title+ext);
+    this.image = image_path;
     download(this.poster,image_path);
   },
 

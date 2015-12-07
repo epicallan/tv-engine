@@ -5,11 +5,13 @@
   "main": "dist/module.js",
   "scripts": {
     "precommit": "npm test",
-    "build": "rimraf dist && webpack --progress --colors --watch",
+    "build": "rimraf dist && webpack --progress --colors ",
     "coverage": "babel-node node_modules/isparta/bin/isparta cover node_modules/mocha/bin/_mocha --report lcovonly -- -R spec",
     "coveralls": "npm run coverage && coveralls < coverage/lcov.info && rimraf coverage",
+    "dist": "babel src --out-dir dist --watch",
     "test": "mocha --recursive --compilers js:babel-core/register",
-    "tdd": "npm test -- --watch"
+    "tdd": "npm test -- --watch",
+    "start": "node dist/index.js"
   },
   "repository": "epicallan/tv-engine",
   "keywords": [],
@@ -49,6 +51,7 @@
     "lodash": "^3.10.1",
     "mongodb": "^2.0.49",
     "mongoose": "^4.2.9",
+    "mongoose-unique-validator": "^0.6.2",
     "object-assign": "^4.0.1",
     "properties-reader": "0.0.13",
     "redis": "^2.4.2",

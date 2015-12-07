@@ -2,3 +2,6 @@ node_modules
 coverage
 npm-debug.log
 dist
+testData
+images
+

@@ -20,7 +20,7 @@ import path from 'path';
 import request from 'request';
 import Media from './models/media.js';
 const mongoose = require('mongoose');
-const assign = require('object-assign');
+
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
@@ -51,23 +51,28 @@ class TvEngine{
   saveMedia(folder){
     const promises = [];
     this.getFiles(folder).then((files)=>{
+      let file_names = files.map(file => file.split('.')[0]);
+      const movie_detail_promises = this.getMovieDetails(file_names);
       _.forIn(this.getFileProperties(files),(promise,key)=>{
         promise.then((stats)=>{
           this.saveToRedis({id:key,data:stats})
-          this.getMovieDetails[key].then((details)=>{
-           this.client.getAsync(key).then((properties)=>{
-              let promise = new Promise((resolve,reject)=>{
-                let saved = this.mediaObjectSave(properties,details);
-                resolve(saved);
-                reject('error');
-              });
-              promises.push(promise);
-              if (promises.length == files.length) return promises;
-            });
-          });
-        });
+              .then((data)=>console.log(data))
+              .catch((error)=>console.log(error));
+           movie_detail_promises[key].then((details)=>{
+            this.getFromRedis(key).then((properties)=>{
+                let promise = new Promise((resolve,reject)=>{
+                  let saved = this.mediaObjectSave(properties,JSON.parse(details));
+                  resolve(saved);
+                  reject('save error');
+                }).then((data)=> console.log(data))
+                  .catch((error)=>console.log(error));
+                promises.push(promise);
+                if (promises.length == files.length) return promises;
+              }).catch((error)=>console.log(error));
+          }).catch((error)=>console.log(error));
+        }).catch((error)=>console.log(error));
       });
-    })
+    }).catch((error)=>console.log(error));
 
   }
 
@@ -80,17 +85,29 @@ class TvEngine{
     });
   }
 
+  getFromRedis(key){
+    return new Promise((resolve,reject)=>{
+      this.client.hgetall(key,(err, obj) => {
+        resolve(obj);
+        reject(err);
+      });
+    });
+  }
+
   mediaObjectSave(properties,imdb){
     try{
-      const details = {};
-      _.forIn(imdb,(value,key) =>{
-        details[key.lowerCaseFirstLetter()] = value
-      });
-      const media_obj = assign({},details,properties);
+      let details = {};
+      for (var prop in imdb) {
+          let key = prop.lowerCaseFirstLetter();
+          let value = imdb[prop];
+          details[key] = value;
+        }
+      const media_obj = _.assign({},details,properties);
+      //console.log(media_obj);
       let media =  new Media(media_obj);
       media.downloadSaveImage();
       return media.validateAndSave();
-    }catch(error){
+      }catch(error){
       console.log(error);
     }
 
@@ -122,7 +139,7 @@ class TvEngine{
     let promises = {};
     files.forEach((file) => {
       let url = this.base_url+'t='+file+'&plot=short&r=json';
-      promises[file.split('.')[0]] =  new Promise(function(resolve,reject){
+      promises[file] =  new Promise(function(resolve,reject){
          request(url, function (error, response, body) {
           if (!error && response.statusCode == 200) {
             resolve(body);

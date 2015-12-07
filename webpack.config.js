@@ -1,8 +1,9 @@
 var webpack = require('webpack');
+var path = require('path');
 
 module.exports = {
   target: 'node',
-  entry: './src/module.js',
+  entry: './src/index.js',
   output: {
     path: './dist',
     filename: 'module.js',
@@ -17,11 +18,17 @@ module.exports = {
   module: {
     loaders: [{
       test: /\.js?$/,
-      exclude: /(node_modules|bower_components)/,
+      include: [
+        path.resolve(__dirname, 'src')
+      ],
       loader: 'babel',
+      resolve: {
+          extensions: ['', '.js']
+      },
       query: {
         presets: ['es2015', 'stage-0']
-      }
+      },
+      plugins: ['transform-runtime']
     }]
   }
 };

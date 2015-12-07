@@ -3,7 +3,8 @@
  */
 'use strict'
 
-import tvEngine from '../dist/module'
+import tvEngine from './module'
+import path from 'path';
 
-tvEngine.saveMedia('../testData');
+tvEngine.saveMedia(path.resolve(__dirname,'../testData'));
 

@@ -13,6 +13,8 @@ $ npm install --save tv-engine
 
 ## Usage
 ```js
+TODO autocreate images and testData folder if not available
+TODO figure out why webpack not working
 var tvEngine = require('tv-engine');
 ```
 

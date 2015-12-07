@@ -1,8 +1,17 @@
 import { expect as expect } from 'chai';
 import tvEngine from '../src/module.js';
-import {download} from '../src/models/media.js';
+import Media,{download} from '../src/models/media.js';
 
 describe('tvEngine unit tests', () => {
+
+  after(()=>{
+    //remove inserted MongoDb objects and redis objects
+    Media.remove({ title: 'test' }, function (err) {
+      if(err) console.log(err);
+    });
+
+  });
+
   it('should be able to access a files in a provided folder', () => {
     const fileReader = tvEngine.getFiles('testData');
     fileReader.then(function(files){
@@ -47,7 +56,7 @@ describe('tvEngine unit tests', () => {
       blkSize:2333,
       location:'/testData/antman.txt'
       }
-    let imdb_details ={'Title':'Frozen','Year':'2013','Rated':'PG','Released':'27 Nov 2013',
+    let imdb_details ={'Title':'test','Year':'2013','Rated':'PG','Released':'27 Nov 2013',
     'Runtime':'102 min','Genre':'Animation, Adventure, Comedy','Director':'Chris Buck, Jennifer Lee',
     'Writer':'Jennifer Lee (screenplay), Hans Christian Andersen (inspired by the story \'The Snow Queen\' by), Chris Buck (story), Jennifer Lee (story), Shane Morris (story), Dean Wellins (additional story)',
     'Actors':'Kristen Bell, Idina Menzel, Jonathan Groff, Josh Gad',
@@ -57,7 +66,7 @@ describe('tvEngine unit tests', () => {
     'Language':'English, Icelandic','Country':'USA','Awards':'Won 2 Oscars. Another 69 wins & 55 nominations.',
     'Poster':'http://ia.media-imdb.com/images/M/MV5BMTQ1MjQwMTE5OF5BMl5BanBnXkFtZTgwNjk3MTcyMDE@._V1_SX300.jpg',
     'Metascore':'74','imdbRating':'7.6',
-    'imdbVotes':'378,442','imdbID':'tt2294629','Type':'movie','Response':'True'}
+    'imdbVotes':'378,442','imdbID':'tt2294629','Type':'testType','Response':'True'}
     let saved = tvEngine.mediaObjectSave(properties,imdb_details);
     expect(saved).to.not.be.empty;
   });
@@ -78,15 +87,24 @@ describe('tvEngine unit tests', () => {
   });
 });
 
-/**
- * TODO this test is not comprehensive
- */
-describe('tvEngine integration test',()=>{
-  it('should be able to get files from folder and save to db',()=>{
-    const promises = tvEngine.saveMedia('../testData')
-    Promise.all(promises).then(function(objs){
-      expect(objs).to.be.an('object');
-      expect(objs).to.not.be.empty;
+describe('redis save and get',()=>{
+  //save object to redis
+  before(()=>{
+    let props ={
+      'size':1000,
+      'name':'testMovie',
+      'genre':'action'
+    };
+    let obj = {id:'test',data:props}
+    tvEngine.saveToRedis(obj).then(function(res){
+      console.log('redus test save: '+res);
+    });
+  });
+  it('should get object from redis by key',()=>{
+    tvEngine.getFromRedis('test').then((res)=> {
+      console.log(res)
+      expect(res).to.be.an('object');
+      expect(res).to.not.be.empty;
     });
   });
 });
