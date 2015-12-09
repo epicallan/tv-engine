@@ -1,5 +1,5 @@
 import { expect as expect } from 'chai';
-import tvEngine from '../src/module.js';
+import tvEngine from '../src/controllers/media_controller.js';
 import Media,{download} from '../src/models/media.js';
 
 describe('tvEngine unit tests', () => {

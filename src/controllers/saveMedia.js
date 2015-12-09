@@ -18,7 +18,7 @@ import bluebird from 'bluebird';
 import _ from 'lodash';
 import path from 'path';
 import request from 'request';
-import Media from './models/media.js';
+import Media from '../models/media.js';
 const mongoose = require('mongoose');
 
 
@@ -50,24 +50,35 @@ class TvEngine{
    */
   saveMedia(folder){
     const promises = [];
+    //gets a list of files from a directory
     this.getFiles(folder).then((files)=>{
+      //remove media file extensions array
       let file_names = files.map(file => file.split('.')[0]);
+      //get  series or movie media details from IMDB as a list of promises
       const movie_detail_promises = this.getMovieDetails(file_names);
+      //get file properties eg file size as promise objects witth file names as keys
       _.forIn(this.getFileProperties(files),(promise,key)=>{
+        //temporary save file stats to redis TODO could use generators so that once
+        //the network call from imdb returns with an obj, the stats obj can be retrieved and
+        //merged with the imdb obj
         promise.then((stats)=>{
+          //saving to redis
           this.saveToRedis({id:key,data:stats})
               .then((data)=>console.log(data))
               .catch((error)=>console.log(error));
+          //imdb movie promise with details
            movie_detail_promises[key].then((details)=>{
+            //get this movies stats from redis
             this.getFromRedis(key).then((properties)=>{
-                let promise = new Promise((resolve,reject)=>{
-                  let saved = this.mediaObjectSave(properties,JSON.parse(details));
-                  resolve(saved);
-                  reject('save error');
-                }).then((data)=> console.log(data))
-                  .catch((error)=>console.log(error));
-                promises.push(promise);
-                if (promises.length == files.length) return promises;
+              //we are now merging the objects and saving to mongo
+              let promise = new Promise((resolve,reject)=>{
+                let saved = this.mediaObjectSave(properties,JSON.parse(details));
+                resolve(saved);
+                reject('save error');
+              }).then((data)=> console.log(data))
+                .catch((error)=>console.log(error));
+              promises.push(promise);
+              if (promises.length == files.length) return promises;
               }).catch((error)=>console.log(error));
           }).catch((error)=>console.log(error));
         }).catch((error)=>console.log(error));
@@ -96,12 +107,9 @@ class TvEngine{
 
   mediaObjectSave(properties,imdb){
     try{
-      let details = {};
-      for (var prop in imdb) {
-          let key = prop.lowerCaseFirstLetter();
-          let value = imdb[prop];
-          details[key] = value;
-        }
+
+      //corece imdb rating to number
+      const details = this.processMediaDetails(imdb);
       const media_obj = _.assign({},details,properties);
       //console.log(media_obj);
       let media =  new Media(media_obj);
@@ -135,12 +143,52 @@ class TvEngine{
     return promises;
   }
 
+  processMediaDetails(imdb){
+    let details = {};
+    for (var prop in imdb) {
+        let key = prop.lowerCaseFirstLetter();
+        let value = imdb[prop];
+        details[key] = value;
+    }
+    //casting to number
+    details.imdbRating = ~~ details.imdbRating;
+    //converting to array
+    details.actors = details.actors.split(',');
+    details.diretors = details.diretors.split(',');
+    let tags = details.genre.split(',');
+    details.genre= this.getMediaGenre(tags);
+    details.tags = tags
+    details.writer = details.writer.split(',');
+  }
+
+  getMediaGenre(genres){
+    //should be env virable
+    let tags = ['comedy','animation','horror','crime','fantasy','romance','crime',
+                'adventure','drama','action','sci-fi','family','thriller','war'];
+    let tag_index = null;
+    //if the genre and tag arent an exact match we use a regular expression
+    genres.forEach((genre)=>{
+        genre = genre.toLowerCase();
+        genre = genre.trim();
+        tags.forEach((tag,index)=>{
+          let tag_sub = tag.substring(0,3);
+          var regex = new RegExp('/^'+tag_sub+'.*$/');
+          if(genre == tag){
+            tag_index = index;
+          }else if(genre.match(regex)){
+            tag_index = index;
+          }
+        });
+      });
+    return tag_index;
+  }
+
   getMovieDetails(files){
     let promises = {};
     files.forEach((file) => {
       let url = this.base_url+'t='+file+'&plot=short&r=json';
       promises[file] =  new Promise(function(resolve,reject){
-         request(url, function (error, response, body) {
+         request(url, (error, response, body) => {
           if (!error && response.statusCode == 200) {
             resolve(body);
           }else{
@@ -159,7 +207,6 @@ class TvEngine{
       });
     });
   }
-
 }
 
 let tvEngine = new TvEngine();

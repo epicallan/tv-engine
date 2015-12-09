@@ -13,9 +13,16 @@ $ npm install --save tv-engine
 
 ## Usage
 ```js
-TODO autocreate images and testData folder if not available
-TODO figure out why webpack not working
-var tvEngine = require('tv-engine');
+  TODO autocreate images and testData folder if not available
+  TODO figure out why webpack not working
+  var tvEngine = require('tv-engine');
+```
+## Search
+
+```
+we are using elasticsearch for search, the search feature doesnt respect movie rating
+the filter feature respects rating and its done by mongodb
+
 ```
 
 ## API
