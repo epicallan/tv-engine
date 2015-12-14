@@ -6,7 +6,7 @@
 var controller = require('../src/controllers/getMedia');
 // Define the routes module' method
 module.exports = function(app) {
-    app.route('/api/search').post(controller.search);
-    app.route('/api/tag').post(controller.getByTag);
-    app.route('/api/login').post(controller.getByNameAndTag);
+    app.route('/api/search').post(controller.getByNameAndType);
+    app.route('/api/search-by-tag').post(controller.getByNameTagAndType);
+    app.route('/api/media').post(controller.getByTagAndType);
 };

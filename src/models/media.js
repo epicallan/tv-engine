@@ -47,16 +47,7 @@ const MediaSchema = new Schema({
  */
 MediaSchema.plugin(uniqueValidator);
 MediaSchema.plugin(mongoosastic);
-//enabling elastic search
-Media.createMapping(function(err, mapping) {
-  if (err) {
-    console.log('error creating mapping (you can safely ignore this)');
-    console.log(err);
-  } else {
-    console.log('mapping created!');
-    console.log(mapping);
-  }
-});
+
 //validation
 MediaSchema.path('genre').required(true, 'Media genre cannot be blank');
 MediaSchema.path('actors').required(true, 'Media Actors cannot be blank');
@@ -73,29 +64,22 @@ MediaSchema.pre('remove', function (next) {
   next();
 });
 
-/**
- * private methods
- */
-export function download(image_url,image_path){
-  return new Promise((resolve,reject)=>{
-      request
-      .get(image_url)
-      .on('response',(response) => {
-        resolve(response.headers['content-type']);
-      })
-      .on('error', function(err) {
-        reject(err);
-        throw new Error(err.toString);
-      })
-      .pipe(fs.createWriteStream(image_path));
-    });
-}
 
 /**
  * Methods
  */
 
 MediaSchema.methods = {
+  /**
+   * removeCollection
+   * @return {[type]} [description]
+   */
+  removeCollection:function(){
+      mongoose.connection.db.dropCollection('media', function(err, result) {
+        if(err) throw err;
+        console.log(result);
+      });
+  },
 
   /**
    * Save Media
@@ -123,10 +107,9 @@ MediaSchema.methods = {
       .exec();
   },
 
-  downloadSaveImage: function(){
-    let dir = '/home/allan/tv-engine/images';
+  downloadSaveImage: function(download){
     let ext = path.extname(this.poster);
-    let image_path = path.join(dir,this.title+ext);
+    let image_path = path.resolve(__dirname,'../images'+this.title+ext);
     this.image = image_path;
     download(this.poster,image_path);
   },
@@ -147,7 +130,17 @@ MediaSchema.methods = {
       .exec();
   }
 };
-
+//enabling elastic search
 const Media = mongoose.model('Media', MediaSchema);
+
+Media.createMapping(function(err, mapping) {
+  if (err) {
+    console.log('error creating mapping (you can safely ignore this)');
+    console.log(err);
+  } else {
+    console.log('mapping created!');
+    console.log(mapping);
+  }
+});
 
 export default Media;

@@ -1,24 +1,25 @@
-/**
- * tvEngine
- * Description
- *
- * @name tvEngine
- * @function
- * @param {Array} data An array of data
- * @param {Object} options An object containing the following fields:
- *
- * @return {Array} Result
- */
 'use strict'
 import Media from '../models/media.js';
+import stringify from 'stringify';
 
 //log errors to file
-function handleError(err){
-  console.log(err);
+function handleError(error,res){
+  console.log(stringify(error));
+  res.status(500).json({ error: stringify(error) })
 }
 
-export const getByNameAndTag = function(req,res){
-  //TODO
+export const getByNameAndType = function(req,res){
+  //TODO include type in search
+  var query = {
+    'fuzzy' : { 'title' : req.body.query}
+  }
+  Media.search(query, function(err, results) {
+    res.json(results);
+  });
+};
+
+export const getByNameTagAndType = function(req,res){
+  //TODO include type in search
   var query = {
     'fuzzy' : { 'title' : req.body.query}
   }
@@ -28,7 +29,7 @@ export const getByNameAndTag = function(req,res){
 };
 
 
-export const getByTag = function(req,res){
+export const getByTagAndType = function(req,res){
   Media.
   find({
     genre:req.body.tag
@@ -37,16 +38,7 @@ export const getByTag = function(req,res){
   limit(24).
   sort({ imdbRating: 1 }).
   exec((err,docs)=>{
-    if (err) return handleError(err);
+    if (err) return handleError(err,res);
     res.json(docs);
   });
 };
-
-export const search = function(req,res){
-  var query = {
-    'fuzzy' : { 'title' : req.body.query}
-  }
-  Media.search(query, function(err, results) {
-    res.json(results);
-  });
-}

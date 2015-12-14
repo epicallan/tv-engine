@@ -1,29 +1,21 @@
 var webpack = require('webpack');
-var path = require('path');
+
 
 module.exports = {
   target: 'node',
   entry: './src/index.js',
   output: {
     path: './dist',
-    filename: 'module.js',
+    filename: 'bundle.js',
     libraryTarget: 'umd'
-  },
-  node: {
-    console: 'empty',
-    fs: 'empty',
-    net: 'empty',
-    tls: 'empty'
   },
   module: {
     loaders: [{
       test: /\.js?$/,
-      include: [
-        path.resolve(__dirname, 'src')
-      ],
+      exclude: /node_modules/,
       loader: 'babel',
       resolve: {
-          extensions: ['', '.js']
+          extensions: ['.js']
       },
       query: {
         presets: ['es2015', 'stage-0']
