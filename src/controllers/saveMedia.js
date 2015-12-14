@@ -1,8 +1,8 @@
 /**
- * tvEngine
+ * TvEngineSaveMedia
  * Description
  *
- * @name tvEngine
+ * @name TvEngineSaveMedia
  * @function
  * @param {Array} data An array of data
  * @param {Object} options An object containing the following fields:
@@ -18,7 +18,7 @@ import bluebird from 'bluebird';
 import _ from 'lodash';
 import path from 'path';
 import request from 'request';
-import prettyjson from 'prettyjson';
+//import prettyjson from 'prettyjson';
 import Media from '../models/media.js';
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
@@ -29,7 +29,7 @@ String.prototype.lowerCaseFirstLetter = function() {
 };
 
 
-class TvEngine {
+class TvEngineSaveMedia {
 
   constructor() {
     this.media = Media;
@@ -229,7 +229,4 @@ class TvEngine {
     });
   }
 }
-
-let tvEngine = new TvEngine();
-
-export default tvEngine;
+export default new TvEngineSaveMedia();

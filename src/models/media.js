@@ -3,8 +3,6 @@
 /**
  * Module dependencies.
  */
-import request from 'request';
-import fs from 'fs';
 import path from 'path';
 import uniqueValidator from 'mongoose-unique-validator';
 import mongoose from 'mongoose';

@@ -1,6 +1,6 @@
 // Invoke 'strict' JavaScript mode
 'use strict';
-import express from './config/express';
+var express = require('./dist/config/express') ;
 
 // Set the 'NODE_ENV' variable
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -15,4 +15,4 @@ app.listen(3000);
 console.log('Server running at http://localhost:3000/');
 
 // Use the module.exports property to expose our Express application instance for external usage
-export default app;
+module.export = app;

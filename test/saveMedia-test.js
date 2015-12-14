@@ -15,8 +15,12 @@ describe('tvEngine unit tests', () => {
 
   after(() => {
     //remove inserted MongoDb objects and redis objects
-      
-      //configs.dbClose();
+    tvEngine.media.remove({
+      title: 'test'
+    }, function(err) {
+      if (err) console.log(err);
+    });
+    //configs.dbClose();
   });
 
   it('should be able to access files in a provided folder', () => {
@@ -48,7 +52,7 @@ describe('tvEngine unit tests', () => {
 
   it('should be able to save media image to disk', () => {
     //let image_path = '/home/allan/tv-engine/images/frozen.jpg';
-    let image_path = path.resolve(__dirname,'images/frozen.jpg')
+    let image_path = path.resolve(__dirname, 'images/frozen.jpg')
     let url = 'http://ia.media-imdb.com/images/M/MV5BMTQ1MjQwMTE5OF5BMl5BanBnXkFtZTgwNjk3MTcyMDE@._V1_SX300.jpg';
     tvEngine.download(url, image_path).then((path) => {
       expect(path).to.be.a('string');
