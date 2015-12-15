@@ -118,14 +118,13 @@ class TvEngineSaveMedia {
 
       let media = new Media(media_obj);
       media.downloadSaveImage(this.download);
-      //return promise on elasticsearch index
-    /*  media.save(function() {
+      media.save(function() {
+        console.log('document saved to mongo');
         media.on('es-indexed', function() {
           console.log('document indexed');
           callback();
         });
-      });*/
-      media.validateAndSave(callback);
+      });
     } catch (error) {
       console.log(error);
     }

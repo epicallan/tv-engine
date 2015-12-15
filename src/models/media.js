@@ -57,13 +57,60 @@ MediaSchema.path('actors').required(true, 'Media Actors cannot be blank');
 MediaSchema.path('title').required(true, 'Media Title cannot be blank');
 MediaSchema.path('location').required(true, 'Media Location on disk cannot be null');
 
+MediaSchema.pre('save', function(next) {
+  const err = this.validateSync();
+  if(err) console.log(err);
+  if (err && err.toString()) throw new Error(err.toString());
+  next();
+});
+
 /**
  * Methods
  */
+ MediaSchema.methods = {
 
+   /**
+    * Find Media by id
+    *
+    * @param {ObjectId} id
+    * @api private
+    */
+
+   load: function(_id) {
+     return this.findOne({
+         _id
+       })
+       .exec();
+   },
+
+   downloadSaveImage: function(download) {
+     let ext = path.extname(this.poster);
+     let image_path = path.resolve(__dirname, '../../images/' + this.title + ext);
+     this.image = image_path;
+     download(this.poster, image_path);
+   },
+
+   /**
+    * List Medias
+    *
+    * @param {Object} options
+    * @api private
+    */
+
+   list: function(options) {
+     const criteria = options.criteria || {};
+     const limit = options.limit || 30;
+     return this.find(criteria)
+       .sort({
+         createdAt: -1
+       })
+       .limit(limit)
+       .exec();
+   }
+ };
 
 //enabling elastic search
-const Media = mongoose.model('Media15', MediaSchema);
+const Media = mongoose.model('Media25', MediaSchema);
 //create index if none exists
 Media.createMapping(function(err, mapping) {
   if (err) {
