@@ -3,24 +3,24 @@ import {
 }
 from 'chai';
 import tvEngine from '../src/controllers/saveMedia.js';
-import configs from '../config/config';
+import config from '../src/config/config';
 import path from 'path';
 
 describe('tvEngine unit tests', () => {
 
-  before(() => {
-    //connect to Db
-    if (!configs.connection) configs.dbOpen('tv-test');
+  before((done) => {
+
   });
 
   after(() => {
     //remove inserted MongoDb objects and redis objects
-    tvEngine.media.remove({
-      title: 'test'
-    }, function(err) {
-      if (err) console.log(err);
-    });
-    //configs.dbClose();
+    /*  tvEngine.media.remove({
+        title: 'test'
+      }, function(err) {
+        if (err) console.log(err);
+      });*/
+    config.dbClose();
+    config.closeEsClient();
   });
 
   it('should be able to access files in a provided folder', () => {

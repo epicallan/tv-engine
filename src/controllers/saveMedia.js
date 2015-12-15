@@ -74,18 +74,28 @@ class TvEngineSaveMedia {
             this.getFromRedis(key).then((properties) => {
               //we are now merging the objects and saving to mongo and elasticsearch
               let promise = new Promise((resolve, reject) => {
-                  let saved = this.mediaObjectSave(properties, JSON.parse(details));
-                  resolve(saved);
-                  reject('save error');
-                }).then((data) => console.log(data))
-                .catch((error) => console.log(error));
-              promises.push(promise);
-              if (promises.length == files.length) return promises;
-            }).catch((error) => console.log(error));
-          }).catch((error) => console.log(error));
-        }).catch((error) => console.log(error));
+                let saved = this.mediaObjectSave(properties, JSON.parse(details));
+                resolve(saved);
+                reject('save error');
+                promises.push(promise);
+              });
+              if (promises.length == files.length) {
+                console.log('finished write');
+                return promises;
+              }
+            }).catch((error) => {
+              if (error) console.log(error)
+            });
+          }).catch((error) => {
+            if (error) console.log(error)
+          });
+        }).catch((error) => {
+          if (error) console.log(error)
+        });
       });
-    }).catch((error) => console.log(error));
+    }).catch((error) => {
+      if (error) console.log(error)
+    });
 
   }
 

@@ -6,6 +6,7 @@
 import path from 'path';
 import uniqueValidator from 'mongoose-unique-validator';
 import mongoose from 'mongoose';
+import config from '../config/config'
 import mongoosastic from 'mongoosastic';
 const Schema = mongoose.Schema;
 
@@ -20,7 +21,7 @@ const MediaSchema = new Schema({
   released: { type : String, default : '', trim : true },
   runtime: { type : String, default : '', trim : true },
   genre: { type : Number,es_indexed:true,es_type:'integer'},
-  tags:{type: [String], default: '', trim:true, es_type:'string'},
+  tags:{type: [String], default:[], trim:true, es_type:'string'},
   director: { type : [String],default:[],es_indexed:true },
   writer: { type : [String], default :[]},
   actors: { type : [String],es_indexed:true,es_boost:2.0 },
@@ -40,11 +41,15 @@ const MediaSchema = new Schema({
   birthtime:String
 });
 
+
+MediaSchema.plugin(mongoosastic, {
+  esClient: config.getEsClient()
+});
 /**
  * Validations
  */
 MediaSchema.plugin(uniqueValidator);
-MediaSchema.plugin(mongoosastic);
+
 
 //validation
 MediaSchema.path('genre').required(true, 'Media genre cannot be blank');
@@ -56,11 +61,6 @@ MediaSchema.path('location').required(true, 'Media Location on disk cannot be nu
  * Pre-remove hook
  */
 
-MediaSchema.pre('remove', function (next) {
-  // delete image from disk
-  // ask for admin password
-  next();
-});
 
 
 /**
@@ -107,7 +107,7 @@ MediaSchema.methods = {
 
   downloadSaveImage: function(download){
     let ext = path.extname(this.poster);
-    let image_path = path.resolve(__dirname,'../images'+this.title+ext);
+    let image_path = path.resolve(__dirname,'../../images/'+this.title+ext);
     this.image = image_path;
     download(this.poster,image_path);
   },
@@ -130,7 +130,7 @@ MediaSchema.methods = {
 };
 //enabling elastic search
 const Media = mongoose.model('Media', MediaSchema);
-
+//create index if none exists
 Media.createMapping(function(err, mapping) {
   if (err) {
     console.log('error creating mapping (you can safely ignore this)');

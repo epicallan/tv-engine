@@ -48,9 +48,11 @@
   },
   "license": "MIT",
   "dependencies": {
+    "async": "^1.5.0",
     "bluebird": "^3.0.5",
     "body-parser": "^1.14.1",
     "compression": "^1.6.0",
+    "elasticsearch": "^10.0.1",
     "express": "^4.13.3",
     "lodash": "^3.10.1",
     "method-override": "^2.3.5",
