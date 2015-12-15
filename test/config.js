@@ -67,7 +67,7 @@ function bookTitlesArray() {
 }
 
 module.exports = {
-  mongoUrl: 'mongodb://localhost/es-test',
+  mongoUrl: 'mongodb://localhost/test',
   INDEXING_TIMEOUT: INDEXING_TIMEOUT,
   BULK_ACTION_TIMEOUT: BULK_ACTION_TIMEOUT,
   deleteIndexIfExists: deleteIndexIfExists,
