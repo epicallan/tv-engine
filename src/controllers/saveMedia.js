@@ -47,8 +47,7 @@ class TvEngineSaveMedia {
    * the imdb object for saving to mmongodb
    * @return {[type]} [description]
    */
-  saveMedia(folder) {
-    const promises = [];
+  saveMedia(folder, callback) {
     //gets a list of files from a directory
     this.getFiles(folder).then((files) => {
       //remove media file extensions array
@@ -66,23 +65,15 @@ class TvEngineSaveMedia {
               id: key,
               data: stats
             })
-            .then((data) => console.log(data))
+            .then((data) => console.log('added to redis: ' + data))
             .catch((error) => console.log(error));
           //imdb movie promise with details
           movie_detail_promises[key].then((details) => {
             //get this movies stats from redis
             this.getFromRedis(key).then((properties) => {
               //we are now merging the objects and saving to mongo and elasticsearch
-              let promise = new Promise((resolve, reject) => {
-                let saved = this.mediaObjectSave(properties, JSON.parse(details));
-                resolve(saved);
-                reject('save error');
-                promises.push(promise);
-              });
-              if (promises.length == files.length) {
-                console.log('finished write');
-                return promises;
-              }
+              this.mediaObjectSave(properties, JSON.parse(details), callback);
+
             }).catch((error) => {
               if (error) console.log(error)
             });
@@ -117,15 +108,24 @@ class TvEngineSaveMedia {
     });
   }
 
-  mediaObjectSave(properties, imdb) {
+  mediaObjectSave(properties, imdb, callback) {
     try {
 
       //corece imdb rating to number
       const details = this.processMediaDetails(imdb);
+
       const media_obj = _.assign({}, details, properties);
+
       let media = new Media(media_obj);
       media.downloadSaveImage(this.download);
-      return media.validateAndSave();
+      //return promise on elasticsearch index
+    /*  media.save(function() {
+        media.on('es-indexed', function() {
+          console.log('document indexed');
+          callback();
+        });
+      });*/
+      media.validateAndSave(callback);
     } catch (error) {
       console.log(error);
     }
@@ -161,18 +161,19 @@ class TvEngineSaveMedia {
       let value = imdb[prop];
       details[key] = value;
     }
+    //console.log(prettyjson.render(details));
     //casting to number
     details.imdbRating = ~~details.imdbRating;
     //converting to array
     //console.log(prettyjson.render(details));
     if (details.actors !== undefined) details.actors = details.actors.split(',');
-    if (details.diretor !== undefined) details.director = details.diretors.split(',');
+    if (details.director !== undefined) details.director = details.director.split(',');
     if (details.genre !== undefined) {
       let tags = details.genre.split(',');
       details.genre = this.getMediaGenre(tags);
       details.tags = tags
     }
-    if (details.writer) details.writer = details.writer.split(',');
+    if (details.writer !== undefined) details.writer = details.writer.split(',');
     //console.log(prettyjson.render(details));
     return details;
   }
@@ -197,6 +198,7 @@ class TvEngineSaveMedia {
         }
       });
     });
+    tag_index = 1
     return tag_index;
   }
 
