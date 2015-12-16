@@ -56,8 +56,11 @@ MediaSchema.pre('save', function(next) {
   next(err);
 });
 
-//enabling elastic search
-const Media = mongoose.model('Media', MediaSchema);
+//model names
+const env = process.env.NODE_ENV || 'development';
+const index = env == 'development' || 'test' ? 'Media-test' : 'Media';
+console.log('index: '+ index);
+const Media = mongoose.model(index, MediaSchema);
 //create index if none exists
 Media.createMapping(function(err, mapping) {
   if (err) {

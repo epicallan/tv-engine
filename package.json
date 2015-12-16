@@ -9,7 +9,8 @@
     "coverage": "babel-node node_modules/isparta/bin/isparta cover node_modules/mocha/bin/_mocha --report lcovonly -- -R spec",
     "coveralls": "npm run coverage && coveralls < coverage/lcov.info && rimraf coverage",
     "dist": "babel src --out-dir dist --watch",
-    "test": "mocha --recursive --compilers js:babel-core/register",
+    "lint": "eslint src test --cache --cache-location /home/allan/.eslintcache/",
+    "test": "npm run lint && mocha --recursive --compilers js:babel-core/register",
     "tdd": "npm test -- --watch",
     "start": "node dist/app.js"
   },

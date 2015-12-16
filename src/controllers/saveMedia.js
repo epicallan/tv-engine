@@ -12,15 +12,14 @@
 'use strict'
 
 import fs from 'fs';
-//import os from 'os';
 import redis from 'redis'
 import bluebird from 'bluebird';
 import _ from 'lodash';
 import path from 'path';
 import request from 'request';
-//import prettyjson from 'prettyjson';
+import prettyjson from 'prettyjson';
 import Media from '../models/media.js';
-
+import config from '../config/config';
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
@@ -29,10 +28,11 @@ String.prototype.lowerCaseFirstLetter = function() {
 };
 
 
-class TvEngineSaveMedia {
+class SaveMedia {
 
   constructor() {
     this.media = Media;
+    this.genres = config.settings.genres;
     this.base_url = 'http://www.omdbapi.com/?';
     this.client = redis.createClient();
     this.client.on('error', function(err) {
@@ -47,7 +47,7 @@ class TvEngineSaveMedia {
    * the imdb object for saving to mmongodb
    * @return {[type]} [description]
    */
-  saveMedia(folder, callback) {
+  saveData(folder, callback) {
     //gets a list of files from a directory
     this.getFiles(folder).then((files) => {
       //remove media file extensions array
@@ -107,29 +107,28 @@ class TvEngineSaveMedia {
       });
     });
   }
+  mergeMediaObjects(properties, imdb) {
+    const details = this.processMediaDetails(imdb);
+    const media = _.assign({}, details, properties);
+    this.downloadImage(media);
+    return media;
 
-  mediaObjectSave(properties, imdb, callback) {
-    try {
+  }
 
-      //corece imdb rating to number
-      const details = this.processMediaDetails(imdb);
-
-      const media_obj = _.assign({}, details, properties);
-
-      let media = new Media(media_obj);
-      this.downloadImage(media);
-      media.save(function() {
-        console.log('document saved to mongo');
-        media.on('es-indexed', function() {
-          console.log('document indexed');
-          callback();
-        });
+  mediaObjectSave(media_obj, callback) {
+    let media = new Media(media_obj);
+    media.save(function(err) {
+      if (err) {
+        console.log(prettyjson.render(err));
+        callback();
+      }
+      console.log('saved to mongo');
+      media.on('es-indexed', function() {
+        console.log('document indexed');
+        callback();
+        return media_obj;
       });
-
-    } catch (error) {
-      console.log(error);
-    }
-
+    });
   }
 
   /**
@@ -178,28 +177,19 @@ class TvEngineSaveMedia {
     return details;
   }
 
-  getMediaGenre(genres) {
+  getMediaGenre(tags) {
     //should be env virable
-    let tags = ['comedy', 'animation', 'horror', 'crime', 'fantasy', 'romance', 'crime',
-      'adventure', 'drama', 'action', 'sci-fi', 'family', 'thriller', 'war'
-    ];
-    let tag_index = null;
+    let genre = 0;
     //if the genre and tag arent an exact match we use a regular expression
-    genres.forEach((genre) => {
-      genre = genre.toLowerCase();
-      genre = genre.trim();
-      tags.forEach((tag, index) => {
-        let tag_sub = tag.substring(0, 3);
-        var regex = new RegExp('/^' + tag_sub + '.*$/');
-        if (genre == tag) {
-          tag_index = index;
-        } else if (genre.match(regex)) {
-          tag_index = index;
-        }
-      });
-    });
-    tag_index = 1
-    return tag_index;
+    for (let i = 0; i < tags.length; i++) {
+      let tag = tags[i];
+      tag = tag.toLowerCase().trim();
+      if (this.genres[tag]) {
+        genre = this.genres[tag];
+        break;
+      }
+    }
+    return genre
   }
 
   getMovieDetails(files) {
@@ -220,8 +210,8 @@ class TvEngineSaveMedia {
   }
 
   downloadImage(media) {
-    let src = media.tile+'.'+path.extname(media.poster)
-    media.image = path.resolve(__dirname,'../../images/'+src);
+    let src = media.tile + '.' + path.extname(media.poster)
+    media.image = path.resolve(__dirname, '../../images/' + src);
     return new Promise((resolve, reject) => {
       request
         .get(media.poster)
@@ -243,4 +233,4 @@ class TvEngineSaveMedia {
     });
   }
 }
-export default new TvEngineSaveMedia();
+export default new SaveMedia();

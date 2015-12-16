@@ -10,27 +10,34 @@
     "ecmascript": 6
   },
   "ecmaFeatures": {
-        "modules": true
-    },
+    "modules": true
+  },
   "plugins": [
     "babel"
   ],
-   "globals": {
-      "describe": true,
-      "it": true,
-      "sinon": true
-    },
+  "globals": {
+    "describe": true,
+    "it": true,
+    "sinon": true
+  },
   "rules": {
     "comma-dangle": 1,
-    "quotes": [ 1, "single" ],
+    "quotes": [1, "single"],
     "no-undef": 1,
     "global-strict": 0,
     "no-extra-semi": 1,
     "no-underscore-dangle": 0,
     "no-console": 0,
     "no-unused-vars": 1,
-    "no-trailing-spaces": [1, { "skipBlankLines": true }],
+    "no-trailing-spaces": [1, {
+      "skipBlankLines": true
+    }],
     "no-unreachable": 1,
-    "no-alert": 0
+    "no-alert": 0,
+    "func-names": 0,
+    "no-use-before-define": 1,
+    "one-var": 0,
+    "no-var": 0,
+    "padded-blocks": 0
   }
 }
