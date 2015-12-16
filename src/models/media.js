@@ -16,7 +16,8 @@ const Schema = mongoose.Schema;
 
 const MediaSchema = new Schema({
   title: {
-    type: String, 'unique':true
+    type: String,
+    'unique': true
   }
 });
 
@@ -42,6 +43,14 @@ MediaSchema.pre('save', function(next) {
   if (err && err.toString()) throw new Error(err.toString());
   next(err);
 });
+MediaSchema.methods = {
+  downloadSaveImage: (download) => {
+    download(this.title);
+  },
+  testMethod: ()=>{
+    return this.title;
+  }
+};
 
 //enabling elastic search
 const Media = mongoose.model('Media26', MediaSchema);

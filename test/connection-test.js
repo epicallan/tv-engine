@@ -23,7 +23,7 @@ describe('connection tests', () => {
     mongoose.connect('mongodb://localhost/test-media', function(err) {
       if (err) console.error(err);
       let media = new Media({
-        title: 'mmda'
+        title: 'wrong'
       });
       media.save(function(err) {
         if (err) {
@@ -51,7 +51,7 @@ describe('connection tests', () => {
   it('should be able to do a fuzzy search', (done) => {
     let query = {
         'fuzzy': {
-          'title': 'allan'
+          'title': 'alan'
         }
       }
       //INDEXING_TIMEOUT
