@@ -28,7 +28,7 @@ const Schema = mongoose.Schema;
    poster: { type : String, default : '', trim : true, unique: true  },
    image: { type : String, default : '', trim : true },
    imdbRating: { type : Number, default : 0},
-   type:{type:String},
+   type:Number,
    downloads:Number,
    link:String,
    createdAt:{ type : Date, default : Date.now },
@@ -48,6 +48,7 @@ MediaSchema.plugin(uniqueValidator);
 MediaSchema.path('genre').required(true, 'Media genre cannot be blank');
 MediaSchema.path('actors').required(true, 'Media Actors cannot be blank');
 MediaSchema.path('title').required(true, 'Media Title cannot be blank');
+MediaSchema.path('type').required(true, 'Media type cannot be blank');
 MediaSchema.path('location').required(true, 'Media Location on disk cannot be null');
 
 MediaSchema.pre('save', function(next) {

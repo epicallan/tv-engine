@@ -9,16 +9,19 @@ class TvEngineGetMedia {
   }
 
   handleError(error, res) {
-    console.log(stringify(error));
+    console.error(stringify(error));
     res.status(500).json({
       error: stringify(error)
     })
   }
-  
-  search(name) {
+
+  _search(name) {
     var query = {
       'fuzzy': {
-        'title': name
+        'title': {
+          'value': name,
+          'fuzziness': 7
+        }
       }
     }
     return new Promise((resolve, reject) => {
@@ -28,41 +31,34 @@ class TvEngineGetMedia {
       });
     });
   }
-  getByNameAndType(req, res) {
-    //TODO include type in search
-    var query = {
-      'fuzzy': {
-        'title': req.body.query
-      }
-    }
-    Media.search(query, function(err, results) {
-      res.json(results);
-    });
+
+  getByName(req, res) {
+    this._search(req.body.query).then((data) => {
+      res.json(data)
+    }).catch((err) => {
+      if (err) console.error(err);
+    })
+
   }
-  getByNameTagAndType(req, res) {
-    //TODO include type in search
-    var query = {
-      'fuzzy': {
-        'title': req.body.query
-      }
-    }
-    Media.search(query, function(err, results) {
-      res.json(results);
-    });
-  }
-  getByTagAndType(req, res) {
+  _getFromMongoB(type, genre, rating, callback) {
     Media.
     find({
-      genre: req.body.tag
+      type: type,
+      genre: genre,
+      rating: {
+        $gt: rating,
+        $eq: rating
+      }
     }).
-    where('imdbRating').gte(req.body.rating).
-    limit(24).
+    limit(12).
     sort({
-      imdbRating: 1
+      rating: -1
     }).
-    exec((err, docs) => {
-      if (err) return this.handleError(err, res);
-      res.json(docs);
+    exec(callback);
+  }
+  getByTag(req, res) {
+    this._getFromMongoB(req.body.type, req.body.genre, req.body.rating, (err, results) => {
+      res.json(results);
     });
   }
 }

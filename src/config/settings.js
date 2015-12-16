@@ -12,6 +12,11 @@ const settings = {
     'sci-fi': 10,
     action: 11,
     war: 12
+  },
+  types:{
+    movie:1,
+    series:2,
+    music:3
   }
 }
 export default settings;

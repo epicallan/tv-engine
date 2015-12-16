@@ -33,6 +33,7 @@ class SaveMedia {
   constructor() {
     this.media = Media;
     this.genres = config.settings.genres;
+    this.types = config.settings.types;
     this.base_url = 'http://www.omdbapi.com/?';
     this.client = redis.createClient();
     this.client.on('error', function(err) {
@@ -172,6 +173,7 @@ class SaveMedia {
       details.genre = this.getMediaGenre(tags);
       details.tags = tags
     }
+    details.type = this.types[details.type];
     if (details.writer !== undefined) details.writer = details.writer.split(',');
     //console.log(prettyjson.render(details));
     return details;
