@@ -117,7 +117,7 @@ class TvEngineSaveMedia {
       const media_obj = _.assign({}, details, properties);
 
       let media = new Media(media_obj);
-      media.downloadSaveImage(this.download);
+      this.downloadImage(media);
       media.save(function() {
         console.log('document saved to mongo');
         media.on('es-indexed', function() {
@@ -125,7 +125,7 @@ class TvEngineSaveMedia {
           callback();
         });
       });
-      
+
     } catch (error) {
       console.log(error);
     }
@@ -219,10 +219,12 @@ class TvEngineSaveMedia {
     return promises;
   }
 
-  download(image_url, image_path) {
+  downloadImage(media) {
+    let src = media.tile+'.'+path.extname(media.poster)
+    media.image = path.resolve(__dirname,'../../images/'+src);
     return new Promise((resolve, reject) => {
       request
-        .get(image_url)
+        .get(media.poster)
         .on('response', (response) => {
           resolve(response.headers['content-type']);
         })
@@ -230,7 +232,7 @@ class TvEngineSaveMedia {
           reject(err);
           throw new Error(err.toString);
         })
-        .pipe(fs.createWriteStream(image_path));
+        .pipe(fs.createWriteStream(media.image));
     });
   }
   getFiles(folder_path) {

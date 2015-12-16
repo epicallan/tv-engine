@@ -5,26 +5,14 @@ from 'chai';
 import Media from '../src/models/media'
 import prettyjson from 'prettyjson';
 import mongoose from 'mongoose';
-import config from './config';
-
-
-/*function testData(done) {
-  try {
-    tvEngine.saveMedia(path.resolve(__dirname, 'testData'), () => {
-      done();
-    });
-  } catch (err) {
-    console.log(err);
-  }
-}*/
+import config from '../src/config/config';
+import data from './testData';
 
 describe('connection tests', () => {
   before(function(done) {
     mongoose.connect('mongodb://localhost/test-media', function(err) {
       if (err) console.error(err);
-      let media = new Media({
-        title: 'wrong'
-      });
+      let media = new Media(data[1]);
       media.save(function(err) {
         if (err) {
           console.log(err);
@@ -42,16 +30,17 @@ describe('connection tests', () => {
   });
 
   after((done) => {
-    Media.remove();
-    mongoose.disconnect();
-    config.deleteIndexIfExists(['media22s','media21s','media25s','media23s'], done);
+    config.removeCollection('media', () => {
+      mongoose.disconnect();
+      config.deleteIndexIfExists(['medias'], done);
+    })
   });
 
 
   it('should be able to do a fuzzy search', (done) => {
     let query = {
         'fuzzy': {
-          'title': 'alan'
+          'title': 'gravity'
         }
       }
       //INDEXING_TIMEOUT
@@ -63,7 +52,7 @@ describe('connection tests', () => {
         done();
       });
 
-    },1000)
+    }, 1000)
 
   });
 

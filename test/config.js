@@ -26,55 +26,12 @@ function deleteIndexIfExists(indexes, done) {
   }, done);
 }
 
-function createModelAndEnsureIndex(Model, obj, cb) {
-  var dude = new Model(obj);
-  dude.save(function(err) {
-    if (err) return dude(err);
-
-    dude.on('es-indexed', function() {
-      setTimeout(function() {
-        cb(null, dude);
-      }, INDEXING_TIMEOUT);
-    });
-  });
-}
-
-function createModelAndSave(Model, obj, cb) {
-  var dude = new Model(obj);
-  dude.save(cb);
-}
-
-function saveAndWaitIndex(model, cb) {
-  model.save(function(err) {
-    if (err) cb(err);
-    else {
-      model.once('es-indexed', cb);
-      model.once('es-filtered', cb);
-    }
-  });
-}
-
-function bookTitlesArray() {
-  var books = [
-      'American Gods',
-      'Gods of the Old World',
-      'American Gothic'
-    ], idx;
-  for (idx = 0; idx < 50; idx++) {
-    books.push('ABABABA' + idx);
-  }
-  return books;
-}
 
 module.exports = {
   mongoUrl: 'mongodb://localhost/test',
   INDEXING_TIMEOUT: INDEXING_TIMEOUT,
   BULK_ACTION_TIMEOUT: BULK_ACTION_TIMEOUT,
   deleteIndexIfExists: deleteIndexIfExists,
-  createModelAndEnsureIndex: createModelAndEnsureIndex,
-  createModelAndSave: createModelAndSave,
-  saveAndWaitIndex: saveAndWaitIndex,
-  bookTitlesArray: bookTitlesArray,
   getClient: function() {
     return esClient;
   },

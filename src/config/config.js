@@ -10,13 +10,12 @@
  class configs {
    constructor() {
      this.connection = null;
-     this.esClient = null;
-
-
+     this.esClient = new elasticsearch.Client({
+       host: 'localhost:9200'
+     });
    }
 
    getEsClient() {
-     this.esClient =  new elasticsearch.Client({host: 'localhost:9200'});
      return this.esClient;
    }
 
@@ -25,10 +24,10 @@
    }
 
    deleteIndexIfExists(indexes, done) {
-     async.forEach(indexes, function(index, cb) {
+     async.forEach(indexes, (index, cb) => {
        this.esClient.indices.exists({
          index: index
-       }, function(err, exists) {
+       }, (err, exists) => {
          if (exists) {
            this.esClient.indices.delete({
              index: index
@@ -59,10 +58,11 @@
       * removeCollection
       * @return {[type]} [description]
       */
-   removeCollection(collection) {
+   removeCollection(collection,cb) {
      mongoose.connection.db.dropCollection(collection, function(err, result) {
        if (err) throw err;
        console.log(result);
+       cb();
      });
    }
 
