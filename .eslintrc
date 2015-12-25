@@ -10,14 +10,33 @@
     "ecmascript": 6
   },
   "ecmaFeatures": {
-    "modules": true
+    "modules": true,
+    "arrowFunctions": true,
+    "blockBindings": true,
+    "classes": true,
+    "defaultParams": true,
+    "destructuring": true,
+    "forOf": true,
+    "generators": false,
+    "modules": true,
+    "objectLiteralComputedProperties": true,
+    "objectLiteralDuplicateProperties": false,
+    "objectLiteralShorthandMethods": true,
+    "objectLiteralShorthandProperties": true,
+    "restParams": true,
+    "spread": true,
+    "superInFunctions": true,
+    "templateStrings": true,
   },
+
   "plugins": [
     "babel"
   ],
   "globals": {
     "describe": true,
     "it": true,
+    "async": true,
+    "await": true,
     "sinon": true
   },
   "rules": {

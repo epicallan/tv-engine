@@ -20,6 +20,8 @@ import request from 'request';
 import prettyjson from 'prettyjson';
 import Media from '../models/media.js';
 import config from '../config/config';
+import _async from 'async';
+
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 
@@ -41,13 +43,27 @@ class SaveMedia {
     });
   }
 
-  /**
-   * get media files
-   * get file properties and then get imdb details
-   * file properties temporarily saved to redis and then retrieved and joined to
-   * the imdb object for saving to mmongodb
-   * @return {[type]} [description]
-   */
+  async saveMediaData(folder) {
+      const files = await this.getFiles(folder);
+      //const file_names = files.map(file => file.split('.')[0]);
+      this._getMovieDetails(files, (details) => {
+        details.forEach((obj) => {
+          const properties = await this.getProperties(obj.file);
+          //save media
+          this.mediaObjectSave(properties, JSON.parse(details), (obj) => {
+            if (obj.error) console.error(obj.error);
+            console.log(obj.status);
+          });
+        });
+      });
+    }
+    /**
+     * get media files
+     * get file properties and then get imdb details
+     * file properties temporarily saved to redis and then retrieved and joined to
+     * the imdb object for saving to mmongodb
+     * @return {[type]} [description]
+     */
   saveData(folder, callback) {
     //gets a list of files from a directory
     this.getFiles(folder).then((files) => {
@@ -108,6 +124,7 @@ class SaveMedia {
       });
     });
   }
+
   mergeMediaObjects(properties, imdb) {
     const details = this.processMediaDetails(imdb);
     const media = _.assign({}, details, properties);
@@ -132,11 +149,22 @@ class SaveMedia {
     });
   }
 
-  /**
-   * [getFileProperties description]
-   * @param  {[array]} getFiles a promise that returns files array
-   * @return {[array]}   returns file properties
-   */
+  getProperties(file) {
+      let dir = '/home/allan/tv-engine/testData';
+      let url = path.join(dir, file);
+      new Promise(function(resolve, reject) {
+        fs.stat(url, function(err, stats) {
+          stats.location = url;
+          resolve(stats);
+          reject(err);
+        });
+      });
+    }
+    /**
+     * [getFileProperties description]
+     * @param  {[array]} getFiles a promise that returns files array
+     * @return {[array]}   returns file properties
+     */
   getFileProperties(files) {
     let dir = '/home/allan/tv-engine/testData';
     //let dir = path.join(app_dir,'testData')
@@ -193,7 +221,23 @@ class SaveMedia {
     }
     return genre
   }
+  _getMovieDetails(files, cb) {
+    movie_details = [];
+    _async.each((files, (file, callback)) => {
+      const name = file.split('.')[0]
+      let url = this.base_url + 't=' + name + '&plot=short&r=json';
+      request(url, (error, response, body) => {
+        if (error) callback(error)
+        movie_details.push({
+          file: body
+        });
+      });
 
+    }, (error) => {
+      if (error) throw new Error(error);
+      cb(movie_details);
+    });
+  }
   getMovieDetails(files) {
     let promises = {};
     files.forEach((file) => {
