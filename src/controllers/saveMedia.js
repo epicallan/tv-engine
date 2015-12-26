@@ -1,16 +1,5 @@
-/**
- * TvEngineSaveMedia
- * Description
- *
- * @name TvEngineSaveMedia
- * @function
- * @param {Array} data An array of data
- * @param {Object} options An object containing the following fields:
- *
- * @return {Array} Result
- */
 'use strict'
-
+import 'babel-polyfill';
 import fs from 'fs';
 import redis from 'redis'
 import bluebird from 'bluebird';
@@ -18,12 +7,16 @@ import _ from 'lodash';
 import path from 'path';
 import request from 'request';
 import prettyjson from 'prettyjson';
-import Media from '../models/media.js';
+import Media from '../models/media';
 import config from '../config/config';
 import _async from 'async';
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
+bluebird.promisifyAll(request);
+// const asyncRequest = bluebird.promisify(request);
+
+const OMDBAPI = 'http://www.omdbapi.com/?';
 
 String.prototype.lowerCaseFirstLetter = function() {
   return this.charAt(0).toLowerCase() + this.slice(1)
@@ -34,77 +27,38 @@ class SaveMedia {
 
   constructor() {
     this.media = Media;
+    this.count = 1;
     this.genres = config.settings.genres;
     this.types = config.settings.types;
-    this.base_url = 'http://www.omdbapi.com/?';
     this.client = redis.createClient();
     this.client.on('error', function(err) {
       console.log('Error ' + err);
     });
   }
 
-  async saveMediaData(folder) {
-      const files = await this.getFiles(folder);
-      //const file_names = files.map(file => file.split('.')[0]);
-      this._getMovieDetails(files, (details) => {
-        details.forEach((obj) => {
-          const properties = await this.getProperties(obj.file);
-          //save media
-          this.mediaObjectSave(properties, JSON.parse(details), (obj) => {
-            if (obj.error) console.error(obj.error);
-            console.log(obj.status);
-          });
-        });
+  static requestIMDBData(url) {
+    return new Promise((resolve, reject) => {
+      request(url, (error, response, body) => {
+        reject(error);
+        resolve(body);
+        console.log(body);
       });
-    }
-    /**
-     * get media files
-     * get file properties and then get imdb details
-     * file properties temporarily saved to redis and then retrieved and joined to
-     * the imdb object for saving to mmongodb
-     * @return {[type]} [description]
-     */
-  saveData(folder, callback) {
-    //gets a list of files from a directory
-    this.getFiles(folder).then((files) => {
-      //remove media file extensions array
-      let file_names = files.map(file => file.split('.')[0]);
-      //get  series or movie media details from IMDB as a list of promises
-      const movie_detail_promises = this.getMovieDetails(file_names);
-      //get file properties eg file size as promise objects witth file names as keys
-      _.forIn(this.getFileProperties(files), (promise, key) => {
-        //temporary save file stats to redis TODO could use generators so that once
-        //the network call from imdb returns with an obj, the stats obj can be retrieved and
-        //merged with the imdb obj
-        promise.then((stats) => {
-          //saving to redis
-          this.saveToRedis({
-              id: key,
-              data: stats
-            })
-            .then((data) => console.log('added to redis: ' + data))
-            .catch((error) => console.log(error));
-          //imdb movie promise with details
-          movie_detail_promises[key].then((details) => {
-            //get this movies stats from redis
-            this.getFromRedis(key).then((properties) => {
-              //we are now merging the objects and saving to mongo and elasticsearch
-              this.mediaObjectSave(properties, JSON.parse(details), callback);
-
-            }).catch((error) => {
-              if (error) console.log(error)
-            });
-          }).catch((error) => {
-            if (error) console.log(error)
-          });
-        }).catch((error) => {
-          if (error) console.log(error)
-        });
-      });
-    }).catch((error) => {
-      if (error) console.log(error)
     });
+  }
 
+  async saveMediaData(folder) {
+    const files = await this.getFiles(folder);
+    //const file_names = files.map(file => file.split('.')[0]);
+    this._getMovieDetails(files, (details) => {
+      details.forEach(async(obj) => {
+        const properties = await this.getProperties(obj.file);
+        //save media
+        this.mediaObjectSave(properties, JSON.parse(details), (obj) => {
+          if (obj.error) console.error(obj.error);
+          console.log(obj.status);
+        });
+      });
+    });
   }
 
   saveToRedis(obj) {
@@ -138,50 +92,26 @@ class SaveMedia {
     media.save(function(err) {
       if (err) {
         console.log(prettyjson.render(err));
-        callback();
+        callback(err);
       }
-      console.log('saved to mongo');
       media.on('es-indexed', function() {
         console.log('document indexed');
-        callback();
-        return media_obj;
+        callback(null);
       });
     });
   }
 
   getProperties(file) {
-      let dir = '/home/allan/tv-engine/testData';
-      let url = path.join(dir, file);
-      new Promise(function(resolve, reject) {
-        fs.stat(url, function(err, stats) {
-          stats.location = url;
-          resolve(stats);
-          reject(err);
-        });
-      });
-    }
-    /**
-     * [getFileProperties description]
-     * @param  {[array]} getFiles a promise that returns files array
-     * @return {[array]}   returns file properties
-     */
-  getFileProperties(files) {
     let dir = '/home/allan/tv-engine/testData';
-    //let dir = path.join(app_dir,'testData')
-    let promises = {};
-    files.forEach((file) => {
-      let url = path.join(dir, file);
-      promises[file.split('.')[0]] = new Promise(function(resolve, reject) {
-        fs.stat(url, function(err, stats) {
-          stats.location = url;
-          resolve(stats);
-          reject(err);
-        });
+    let url = path.join(dir, file);
+    return new Promise(function(resolve, reject) {
+      fs.stat(url, function(err, stats) {
+        stats.location = url;
+        resolve(stats);
+        reject(err);
       });
     });
-    return promises;
   }
-
   processMediaDetails(imdb) {
     let details = {};
     for (var prop in imdb) {
@@ -221,27 +151,34 @@ class SaveMedia {
     }
     return genre
   }
-  _getMovieDetails(files, cb) {
-    movie_details = [];
-    _async.each((files, (file, callback)) => {
-      const name = file.split('.')[0]
-      let url = this.base_url + 't=' + name + '&plot=short&r=json';
-      request(url, (error, response, body) => {
-        if (error) callback(error)
-        movie_details.push({
-          file: body
-        });
-      });
 
-    }, (error) => {
-      if (error) throw new Error(error);
+  newGetMovieDetails(files, cb) {
+
+  }
+
+  _getMovieDetails(files, cb) {
+    const movie_details = [];
+    _async.each(files, async(file, callback) => {
+      const name = file.split('.')[0]
+      const url = OMDBAPI + 't=' + name + '&plot=short&r=json';
+      SaveMedia.requestIMDBData(url).then((data) => {
+        movie_details.push({
+          file: name,
+          details: data
+        });
+        console.log(movie_details);
+        callback();
+        return;
+      });
+    }, (err) => {
+      if (err) throw new Error('deleting keys error');
       cb(movie_details);
     });
   }
   getMovieDetails(files) {
     let promises = {};
     files.forEach((file) => {
-      let url = this.base_url + 't=' + file + '&plot=short&r=json';
+      let url = OMDBAPI + 't=' + file + '&plot=short&r=json';
       promises[file] = new Promise(function(resolve, reject) {
         request(url, (error, response, body) => {
           if (!error && response.statusCode == 200) {

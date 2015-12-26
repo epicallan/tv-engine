@@ -1,12 +1,11 @@
 var webpack = require('webpack');
 
-
 module.exports = {
   target: 'node',
-  entry: './src/index.js',
+  entry: 'server.js',
   output: {
     path: './dist',
-    filename: 'bundle.js',
+    filename: 'server.js',
     libraryTarget: 'umd'
   },
   module: {

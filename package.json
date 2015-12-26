@@ -10,7 +10,7 @@
     "coveralls": "npm run coverage && coveralls < coverage/lcov.info && rimraf coverage",
     "dist": "babel src --out-dir dist --watch",
     "lint": "eslint src test --cache --cache-location /home/allan/.eslintcache/",
-    "test": "npm run lint && mocha --recursive --compilers js:babel-core/register",
+    "test": "mocha --recursive --compilers js:babel-core/register",
     "tdd": "npm test -- --watch",
     "start": "node dist/app.js"
   },
@@ -21,10 +21,8 @@
     "src"
   ],
   "devDependencies": {
-    "babel-core": "^6.0.0",
     "babel-eslint": "^4.1.6",
     "babel-loader": "^6.0.0",
-    "babel-polyfill": "^6.2.0",
     "babel-preset-es2015": "^6.0.15",
     "babel-preset-stage-0": "^6.1.18",
     "chai": "^3.2.0",
@@ -50,6 +48,9 @@
   "license": "MIT",
   "dependencies": {
     "async": "^1.5.0",
+    "babel": "^6.3.26",
+    "babel-core": "^6.3.26",
+    "babel-polyfill": "^6.3.14",
     "bluebird": "^3.0.5",
     "body-parser": "^1.14.1",
     "compression": "^1.6.0",

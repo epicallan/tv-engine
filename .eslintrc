@@ -28,7 +28,7 @@
     "superInFunctions": true,
     "templateStrings": true,
   },
-
+  "parser": "babel-eslint",
   "plugins": [
     "babel"
   ],
