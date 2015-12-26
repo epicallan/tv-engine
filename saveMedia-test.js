@@ -1,14 +1,13 @@
-import {
-  expect as expect
-}
-from 'chai';
+import chai from 'chai';
 import tvEngine from '../src/controllers/saveMedia.js';
 import config from '../src/config/config';
 import data from './testData';
 import Media from '../src/models/media'
-import prettyjson from 'prettyjson';
+// import prettyjson from 'prettyjson';
 
-describe('redis save and get', () => {
+const expect = chai.expect;
+
+describe.skip('redis save and get', () => {
   //save objects to redis
   before(() => {
     let props = {
@@ -36,7 +35,7 @@ describe('redis save and get', () => {
   });
 });
 
-describe('transforming data before save', () => {
+describe.skip('transforming data before save', () => {
   before(function(done) {
     config.dbOpen('test-media', () => {
       config.getEsClient(() => {

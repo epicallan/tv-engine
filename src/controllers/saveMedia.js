@@ -49,6 +49,7 @@ class SaveMedia {
    * @return {[type]} [description]
    */
   saveData(folder, callback) {
+    let count = 0;
     //gets a list of files from a directory
     this.getFiles(folder).then((files) => {
       //remove media file extensions array
@@ -70,11 +71,19 @@ class SaveMedia {
             .catch((error) => console.log(error));
           //imdb movie promise with details
           movie_detail_promises[key].then((details) => {
+            //console.log('******returned details****');
+            //console.log(prettyjson.render(details));
             //get this movies stats from redis
             this.getFromRedis(key).then((properties) => {
+              //console.log('******returned properties****');
+              //console.log(prettyjson.render(properties));
               //we are now merging the objects and saving to mongo and elasticsearch
-              this.mediaObjectSave(properties, JSON.parse(details), callback);
-
+              const obj = this.mergeMediaObjects(properties, JSON.parse(details))
+              this.mediaObjectSave(obj,()=>{
+                console.log(`saved ${key} count is ${count} total files are ${files.length}`);
+                count ++;
+                if(files.length === count )return callback();
+              });
             }).catch((error) => {
               if (error) console.log(error)
             });
@@ -103,14 +112,17 @@ class SaveMedia {
   getFromRedis(key) {
     return new Promise((resolve, reject) => {
       this.client.hgetall(key, (err, obj) => {
+        this.client.expireat(key,60000);
         resolve(obj);
         reject(err);
       });
     });
   }
+
   mergeMediaObjects(properties, imdb) {
     const details = this.processMediaDetails(imdb);
     const media = _.assign({}, details, properties);
+    console.log(prettyjson.render(media));
     this.downloadImage(media);
     return media;
 
@@ -120,14 +132,12 @@ class SaveMedia {
     let media = new Media(media_obj);
     media.save(function(err) {
       if (err) {
-        console.log(prettyjson.render(err));
-        callback();
+        throw new Error(err);
       }
       console.log('saved to mongo');
       media.on('es-indexed', function() {
         console.log('document indexed');
         callback();
-        return media_obj;
       });
     });
   }
