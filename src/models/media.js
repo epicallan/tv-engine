@@ -47,6 +47,7 @@ MediaSchema.plugin(uniqueValidator);
 
 MediaSchema.path('genre').required(true, 'Media genre cannot be blank');
 MediaSchema.path('actors').required(true, 'Media Actors cannot be blank');
+MediaSchema.path('image').required(true, 'Media Image cannot be blank');
 MediaSchema.path('title').required(true, 'Media Title cannot be blank');
 MediaSchema.path('type').required(true, 'Media type cannot be blank');
 MediaSchema.path('location').required(true, 'Media Location on disk cannot be null');

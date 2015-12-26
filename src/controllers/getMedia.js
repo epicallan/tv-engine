@@ -17,12 +17,7 @@ class TvEngineGetMedia {
 
   _search(name) {
     var query = {
-      'fuzzy': {
-        'title': {
-          'value': name,
-          'fuzziness': 7
-        }
-      }
+      'fuzzy' : { 'title' : name }
     }
     return new Promise((resolve, reject) => {
       Media.search(query, function(err, results) {
@@ -40,25 +35,26 @@ class TvEngineGetMedia {
     })
 
   }
-  _getFromMongoB(type, genre, rating, callback) {
-    Media.
+  _getFromMongoB(type, genre, rating) {
+    const promise = Media.
     find({
       type: type,
       genre: genre,
-      rating: {
-        $gt: rating,
-        $eq: rating
+      imdbRating: {
+        $gt: rating
       }
     }).
     limit(12).
     sort({
       rating: -1
     }).
-    exec(callback);
+    exec();
+    return promise;
+
   }
   getByTag(req, res) {
-    this._getFromMongoB(req.body.type, req.body.genre, req.body.rating, (err, results) => {
-      res.json(results);
+    this._getFromMongoB(req.body.type, req.body.genre, req.body.rating).then((data) => {
+      res.json(data);
     });
   }
 }

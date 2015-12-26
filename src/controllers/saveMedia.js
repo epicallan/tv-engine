@@ -17,7 +17,7 @@ import bluebird from 'bluebird';
 import _ from 'lodash';
 import path from 'path';
 import request from 'request';
-import prettyjson from 'prettyjson';
+// import prettyjson from 'prettyjson';
 import Media from '../models/media.js';
 import config from '../config/config';
 bluebird.promisifyAll(redis.RedisClient.prototype);
@@ -71,16 +71,10 @@ class SaveMedia {
             .catch((error) => console.log(error));
           //imdb movie promise with details
           movie_detail_promises[key].then((details) => {
-            //console.log('******returned details****');
-            //console.log(prettyjson.render(details));
-            //get this movies stats from redis
             this.getFromRedis(key).then((properties) => {
-              //console.log('******returned properties****');
-              //console.log(prettyjson.render(properties));
-              //we are now merging the objects and saving to mongo and elasticsearch
               const obj = this.mergeMediaObjects(properties, JSON.parse(details))
               this.mediaObjectSave(obj,()=>{
-                console.log(`saved ${key} count is ${count} total files are ${files.length}`);
+                //console.log(`saved ${key} count is ${count} total files are ${files.length}`);
                 count ++;
                 if(files.length === count )return callback();
               });
@@ -121,8 +115,9 @@ class SaveMedia {
 
   mergeMediaObjects(properties, imdb) {
     const details = this.processMediaDetails(imdb);
+    //console.log(prettyjson.render(details));
     const media = _.assign({}, details, properties);
-    console.log(prettyjson.render(media));
+    //console.log(prettyjson.render(media));
     this.downloadImage(media);
     return media;
 
@@ -134,9 +129,9 @@ class SaveMedia {
       if (err) {
         throw new Error(err);
       }
-      console.log('saved to mongo');
+      //console.log('saved to mongo');
       media.on('es-indexed', function() {
-        console.log('document indexed');
+        //console.log('document indexed');
         callback();
       });
     });
@@ -172,6 +167,7 @@ class SaveMedia {
       details[key] = value;
     }
     //console.log(prettyjson.render(details));
+    details.title = details.title.toLowerCase();
     //casting to number
     details.imdbRating = ~~details.imdbRating;
     //converting to array

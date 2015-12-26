@@ -7,7 +7,7 @@ import Media from '../src/models/media'
 
 const expect = chai.expect;
 
-describe.skip('redis save and get', () => {
+describe('redis save and get', () => {
   //save objects to redis
   before(() => {
     let props = {
@@ -35,7 +35,7 @@ describe.skip('redis save and get', () => {
   });
 });
 
-describe.skip('transforming data before save', () => {
+describe('transforming data before save', () => {
   before(function(done) {
     config.dbOpen('test-media', () => {
       config.getEsClient(() => {

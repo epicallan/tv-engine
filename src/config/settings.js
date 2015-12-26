@@ -9,9 +9,10 @@ const settings = {
     crime: 7,
     thriller: 8,
     family: 9,
-    'sci-fi': 10,
+    scifi: 10,
     action: 11,
-    war: 12
+    war: 12,
+    drama:13
   },
   types:{
     movie:1,
