@@ -12,7 +12,8 @@ const data = [{
    poster: 'http://ia.media-imdb.com/images/M/MV5BMTQ1MjQwMTE5OF5BMl5BanBnXkFtZTgwNjk3MTcyMDE@._V1_SX300.jpg',
   'director': ['Chris Buck'],
   'writer': ['Jennifer Lee'],
-  'actors': ['Kristen Bell', 'Idina Menzel']
+  'actors': ['Kristen Bell', 'Idina Menzel'],
+  'type':1
 }, {
   'birthtime': ' Wed Dec 02 2015 12:10:46 GMT+0300',
   'size': 121,
@@ -27,6 +28,7 @@ const data = [{
   'genre': 2,
   'director': ['Chris Buck'],
   'writer': ['Jennifer Lee'],
+  'type':1,
   'actors': ['Kristen Bell', 'Idina Menzel']
 }];
 export const properties = {

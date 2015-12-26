@@ -53,7 +53,6 @@ describe('transforming data before save', () => {
         done();
       });
     });
-
   });
 
   it('should be able to access files in a provided folder', () => {
@@ -112,8 +111,7 @@ describe('transforming data before save', () => {
     setTimeout(() => {
       Media.search(query, function(err, results) {
         if (err) console.log(err);
-        console.log(prettyjson.render(results));
-        expect(results).to.be.an('object');
+        expect(results.hits.hits[0]._source.title).to.equal('gravity');
         done();
       });
 
