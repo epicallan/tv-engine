@@ -19,7 +19,7 @@ describe('querying data from mongoDb and elasticsearch', function() {
     config.dbOpen('test-media', function() {
       config.getEsClient(function() {
         try {
-          tvEngine.saveData('testData', function() {
+          tvEngine.saveData('movies', function() {
             console.log('finished adding all files');
             done();
           });
@@ -30,17 +30,13 @@ describe('querying data from mongoDb and elasticsearch', function() {
     });
   });
   after((done) => {
-    config.removeCollection('media-tests', () => {
-      config.closeEsClient();
-      config.dbClose();
-      done();
-      /*  config.deleteIndexIfExists('media-tests', () => {
-          config.closeEsClient();
-          config.dbClose();
-          console.log('exited');
-          done();
-        });*/
-    });
+    setTimeout(() => {
+      config.removeCollection('media-tests', () => {
+        config.closeEsClient();
+        config.dbClose();
+        done();
+      });
+    },5000);
   });
 
   it('should get media of movie type from mongoDB', (done) => {
@@ -79,7 +75,7 @@ describe('querying data from mongoDb and elasticsearch', function() {
   });
 
   it('should be able to search by name from elasticsearch', (done) => {
-    getMedia._search('titanic').then((data) => {
+    getMedia._search('frozen').then((data) => {
       console.log(prettyjson.render(data));
       expect(data).to.be.an('object');
       done();

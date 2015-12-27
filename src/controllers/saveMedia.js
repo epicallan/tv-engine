@@ -69,7 +69,7 @@ class SaveMedia extends events.EventEmitter {
               data: stats
             })
             .then((data) => console.log('added to redis: ' + data))
-            .catch((error) => console.log(error));
+            .catch((error) => console.log('redis error: '+error));
           //imdb movie promise with details
           movie_detail_promises[key].then((details) => {
             this.getFromRedis(key).then((properties) => {
@@ -86,14 +86,14 @@ class SaveMedia extends events.EventEmitter {
               if (error) console.log(error)
             });
           }).catch((error) => {
-            if (error) console.log(error)
+            if (error) console.log('Getting Movie details errror: '+error);
           });
         }).catch((error) => {
-          if (error) console.log(error)
+          if (error) console.log('Getting file stats error: '+error)
         });
       });
     }).catch((error) => {
-      if (error) console.log(error)
+      if (error) console.log('reading files from folder error: '+error)
     });
 
   }
@@ -232,6 +232,7 @@ class SaveMedia extends events.EventEmitter {
         this.emit('downloadImage', status);
       })
       .on('error', function(err) {
+        console.log('image error :'+ err.toString);
         throw new Error(err.toString);
       })
       .pipe(fs.createWriteStream(media.image));
