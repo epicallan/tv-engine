@@ -3,9 +3,9 @@
  */
 'use strict';
 // Load the module dependencies
-var controller = require('../src/controllers/getMedia');
+import controller from '../controllers/getMedia';
 // Define the routes module' method
-module.exports = function(app) {
-    app.route('/api/search').post(controller.getByName);
-    app.route('/api/media').post(controller.getByTag);
-};
+export default function(app){
+  app.route('/api/search').post(controller.getByName);
+  app.route('/api/media').post(controller.getByTag);
+}

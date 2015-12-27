@@ -1,12 +1,12 @@
 // Invoke 'strict' JavaScript mode
 'use strict';
-var express = require('./dist/config/express') ;
+var app = require('./dist/config/express').default() ;
 
 // Set the 'NODE_ENV' variable
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Create a new Express application instance
-var app = express();
+//var app = express();
 
 // Use the Express application instance to listen to the '3000' port
 app.listen(3000);
