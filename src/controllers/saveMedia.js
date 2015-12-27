@@ -17,21 +17,21 @@ import bluebird from 'bluebird';
 import _ from 'lodash';
 import path from 'path';
 import request from 'request';
-// import prettyjson from 'prettyjson';
 import Media from '../models/media.js';
 import config from '../config/config';
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
+import events from 'events';
 
 String.prototype.lowerCaseFirstLetter = function() {
   return this.charAt(0).toLowerCase() + this.slice(1)
 };
 
-
-class SaveMedia {
+class SaveMedia extends events.EventEmitter {
 
   constructor() {
-    this.media = Media;
+    super()
+    this.dir = null;
     this.genres = config.settings.genres;
     this.types = config.settings.types;
     this.base_url = 'http://www.omdbapi.com/?';
@@ -49,6 +49,7 @@ class SaveMedia {
    * @return {[type]} [description]
    */
   saveData(folder, callback) {
+    this.dir = folder;
     let count = 0;
     //gets a list of files from a directory
     this.getFiles(folder).then((files) => {
@@ -73,10 +74,13 @@ class SaveMedia {
           movie_detail_promises[key].then((details) => {
             this.getFromRedis(key).then((properties) => {
               const obj = this.mergeMediaObjects(properties, JSON.parse(details))
-              this.mediaObjectSave(obj,()=>{
-                //console.log(`saved ${key} count is ${count} total files are ${files.length}`);
-                count ++;
-                if(files.length === count )return callback();
+              this.on('downloadImage', () => {
+                console.log(`received image`);
+              });
+              this.mediaObjectSave(obj, () => {
+                console.log(`saved ${key} count is ${count} total files are ${files.length}`);
+                count++;
+                if (files.length === count) return callback();
               });
             }).catch((error) => {
               if (error) console.log(error)
@@ -106,7 +110,7 @@ class SaveMedia {
   getFromRedis(key) {
     return new Promise((resolve, reject) => {
       this.client.hgetall(key, (err, obj) => {
-        this.client.expireat(key,60000);
+        this.client.expireat(key, 60000);
         resolve(obj);
         reject(err);
       });
@@ -143,11 +147,9 @@ class SaveMedia {
    * @return {[array]}   returns file properties
    */
   getFileProperties(files) {
-    let dir = '/home/allan/tv-engine/testData';
-    //let dir = path.join(app_dir,'testData')
     let promises = {};
     files.forEach((file) => {
-      let url = path.join(dir, file);
+      let url = path.join(this.dir, file);
       promises[file.split('.')[0]] = new Promise(function(resolve, reject) {
         fs.stat(url, function(err, stats) {
           stats.location = url;
@@ -218,20 +220,21 @@ class SaveMedia {
   }
 
   downloadImage(media) {
-    let src = media.tile + '.' + path.extname(media.poster)
+    let src = media.title + path.extname(media.poster);
     media.image = path.resolve(__dirname, '../../images/' + src);
-    return new Promise((resolve, reject) => {
-      request
-        .get(media.poster)
-        .on('response', (response) => {
-          resolve(response.headers['content-type']);
-        })
-        .on('error', function(err) {
-          reject(err);
-          throw new Error(err.toString);
-        })
-        .pipe(fs.createWriteStream(media.image));
-    });
+    let status = null;
+    request
+      .get(media.poster)
+      .on('response', (response) => {
+        status = response.statusCode;
+      })
+      .on('end', function() {
+        this.emit('downloadImage', status);
+      })
+      .on('error', function(err) {
+        throw new Error(err.toString);
+      })
+      .pipe(fs.createWriteStream(media.image));
   }
   getFiles(folder_path) {
     return new Promise(function(resolve, reject) {

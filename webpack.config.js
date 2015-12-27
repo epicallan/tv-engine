@@ -1,9 +1,9 @@
 var webpack = require('webpack');
-
-
+var path = require('path');
+console.log('PATH is : '+path.resolve(__dirname, 'src'))
 module.exports = {
   target: 'node',
-  entry: './src/index.js',
+  entry: './src/app.js',
   output: {
     path: './dist',
     filename: 'bundle.js',
@@ -12,15 +12,11 @@ module.exports = {
   module: {
     loaders: [{
       test: /\.js?$/,
-      exclude: /node_modules/,
+      include: path.resolve(__dirname, 'src'),
       loader: 'babel',
-      resolve: {
-          extensions: ['.js']
-      },
       query: {
         presets: ['es2015', 'stage-0']
-      },
-      plugins: ['transform-runtime']
+      }
     }]
   }
 };

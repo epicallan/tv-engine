@@ -9,11 +9,12 @@ const data = [{
   'released': '27 Nov 2013',
   'runtime': '102 min',
   'genre': 2,
-   poster: 'http://ia.media-imdb.com/images/M/MV5BMTQ1MjQwMTE5OF5BMl5BanBnXkFtZTgwNjk3MTcyMDE@._V1_SX300.jpg',
+  'image': 'image/url',
+  'poster': 'http://ia.media-imdb.com/images/M/MV5BMTQ1MjQwMTE5OF5BMl5BanBnXkFtZTgwNjk3MTcyMDE@._V1_SX300.jpg',
   'director': ['Chris Buck'],
   'writer': ['Jennifer Lee'],
   'actors': ['Kristen Bell', 'Idina Menzel'],
-  'type':1
+  'type': 1
 }, {
   'birthtime': ' Wed Dec 02 2015 12:10:46 GMT+0300',
   'size': 121,
@@ -26,9 +27,10 @@ const data = [{
   'released': '27 Nov 2013',
   'runtime': '102 min',
   'genre': 2,
+  'image':'image/url',
   'director': ['Chris Buck'],
   'writer': ['Jennifer Lee'],
-  'type':1,
+  'type': 1,
   'actors': ['Kristen Bell', 'Idina Menzel']
 }];
 export const properties = {

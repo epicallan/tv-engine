@@ -4,6 +4,7 @@ import config from '../src/config/config';
 import getMedia from '../src/controllers/getMedia'
 import prettyjson from 'prettyjson';
 import elasticsearch from 'elasticsearch';
+
 const client = new elasticsearch.Client({
   host: 'localhost:9200',
   log: 'trace'
