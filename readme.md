@@ -15,6 +15,7 @@ $ npm install --save tv-engine
 ```js
   TODO autocreate images and testData folder if not available
   TODO figure out why webpack not working
+  TODO sci-fi genre needs to be worked on
   TODO utility that looks through a movie folder and gets the movie in it excluding samples
   var tvEngine = require('tv-engine');
 ```

@@ -2,11 +2,7 @@
 import Media from '../models/media.js';
 import stringify from 'stringify';
 
-class TvEngineGetMedia {
-
-  constructor() {
-    this.media = Media;
-  }
+export default class GetMedia {
 
   handleError(error, res) {
     console.error(stringify(error));
@@ -14,30 +10,31 @@ class TvEngineGetMedia {
       error: stringify(error)
     })
   }
-
-  _search(name) {
+  static _search(body) {
     var query = {
       'fuzzy': {
-        'title': name
+        'title': body.query
       }
     }
     return new Promise((resolve, reject) => {
-      Media.search(query, function(err, results) {
-        resolve(results);
-        reject(err);
-      });
+      if (body.type === 1) {
+        Media.search(query, function(err, results) {
+          resolve(results);
+          reject(err);
+        });
+      }
     });
   }
 
   getByName(req, res) {
-    this._search(req.body.query).then((data) => {
+    GetMedia._search(req.body).then((data) => {
       res.json(data);
     }).catch((err) => {
       if (err) console.error(err);
     });
   }
-  _getFromMongoB(body) {
-    let query = {
+  static _getFromMongoDB(body) {
+    const query = {
       type: body.type,
       imdbRating: {
         $gt: body.rating
@@ -57,9 +54,8 @@ class TvEngineGetMedia {
 
   }
   getByTag(req, res) {
-    this._getFromMongoB(req.body).then((data) => {
+    GetMedia._getFromMongoDB(req.body).then((data) => {
       res.json(data);
     });
   }
 }
-export default new TvEngineGetMedia();

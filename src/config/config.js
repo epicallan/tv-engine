@@ -7,13 +7,23 @@
  import elasticsearch from 'elasticsearch';
  import settings from './settings'
 
- class configs {
+ class Config {
    constructor() {
      this.connection = null;
      this.esClient = null;
      this.settings = settings;
+     this.port = 3000;
      process.env.NODE_ENV = process.env.NODE_ENV || 'development'
-
+     if (process.env.NODE_ENV === 'development') {
+       this.db = 'tv-dev';
+       this.index = 'media-dev';
+     } else if (process.env.NODE_ENV === 'production') {
+       this.db = 'tv';
+       this.index = 'media';
+     }else if(process.env.NODE_ENV == 'test'){
+       this.db = 'tv-test';
+       this.index = 'media-test';
+     }
    }
 
    getEsClient(callback) {
@@ -79,10 +89,10 @@
    removeCollection(collection, cb) {
      mongoose.connection.db.dropCollection(collection, function(err, result) {
        if (err) throw err;
-       console.log(result);
+   console.log(result);
        cb();
      });
    }
 
  }
- export default new configs();
+ export default new Config();

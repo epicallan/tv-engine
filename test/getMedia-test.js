@@ -1,7 +1,7 @@
 import chai from 'chai';
 import tvEngine from '../src/controllers/saveMedia';
 import config from '../src/config/config';
-import getMedia from '../src/controllers/getMedia'
+import GetMedia from '../src/controllers/getMedia'
 import prettyjson from 'prettyjson';
 import elasticsearch from 'elasticsearch';
 
@@ -13,7 +13,7 @@ const client = new elasticsearch.Client({
 const expect = chai.expect;
 
 describe('querying data from mongoDb and elasticsearch', function() {
-  this.timeout(20000);
+  this.timeout(10000);
 
   before(function(done) {
     config.dbOpen('test-media', function() {
@@ -36,11 +36,14 @@ describe('querying data from mongoDb and elasticsearch', function() {
         config.dbClose();
         done();
       });
-    },5000);
+    }, 5000);
   });
 
   it('should get media of movie type from mongoDB', (done) => {
-    getMedia._getFromMongoB(1, 2, 7).then((results) => {
+    GetMedia._getFromMongoDB({
+      type: 1,
+      rating: 5
+    }).then((results) => {
       results.forEach((res) => {
         console.log(res.title);
       })
@@ -75,7 +78,7 @@ describe('querying data from mongoDb and elasticsearch', function() {
   });
 
   it('should be able to search by name from elasticsearch', (done) => {
-    getMedia._search('frozen').then((data) => {
+    GetMedia._search('frozen').then((data) => {
       console.log(prettyjson.render(data));
       expect(data).to.be.an('object');
       done();

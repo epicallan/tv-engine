@@ -5,11 +5,6 @@ var app = require('./dist/config/express').default() ;
 // Set the 'NODE_ENV' variable
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Create a new Express application instance
-//var app = express();
-
-// Use the Express application instance to listen to the '3000' port
-app.listen(3000);
 
 // Log the server status to the console
 console.log('Server running at http://localhost:3000/');

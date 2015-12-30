@@ -7,6 +7,7 @@
 import uniqueValidator from 'mongoose-unique-validator';
 import mongoose from 'mongoose';
 import mongoosastic from 'mongoosastic';
+import config from '../config/config'
 const Schema = mongoose.Schema;
 
 /**
@@ -24,13 +25,11 @@ const Schema = mongoose.Schema;
    actors: { type : [String],es_indexed:true,es_boost:2.0 },
    plot: { type : String, default : '', trim : true },
    language: { type : String, default : '', trim : true },
-   description: { type : String, default : '', trim : true },
    poster: { type : String, default : '', trim : true, unique: true  },
    image: { type : String, default : '', trim : true },
    imdbRating: { type : Number, default : 0},
    type:Number,
    downloads:Number,
-   link:String,
    createdAt:{ type : Date, default : Date.now },
    location:String,
    size:Number,
@@ -39,7 +38,7 @@ const Schema = mongoose.Schema;
  });
 
 
-MediaSchema.plugin(mongoosastic);
+MediaSchema.plugin(mongoosastic,{hydrate:true, hydrateOptions: {lean: true}});
 MediaSchema.plugin(uniqueValidator);
 /**
  * Validations
@@ -59,10 +58,7 @@ MediaSchema.pre('save', function(next) {
 });
 
 //model names
-const env = process.env.NODE_ENV || 'development';
-const index = env == 'development' || 'test' ? 'Media-test' : 'Media';
-console.log('index: '+ index);
-const Media = mongoose.model(index, MediaSchema);
+const Media = mongoose.model(config.index, MediaSchema);
 //create index if none exists
 Media.createMapping(function(err, mapping) {
   if (err) {

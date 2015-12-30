@@ -22,6 +22,7 @@ import config from '../config/config';
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 import events from 'events';
+import os from 'os';
 
 String.prototype.lowerCaseFirstLetter = function() {
   return this.charAt(0).toLowerCase() + this.slice(1)
@@ -31,6 +32,7 @@ class SaveMedia extends events.EventEmitter {
 
   constructor() {
     super()
+    console.log(os.hostname());
     this.dir = null;
     this.genres = config.settings.genres;
     this.types = config.settings.types;
@@ -152,7 +154,7 @@ class SaveMedia extends events.EventEmitter {
       let url = path.join(this.dir, file);
       promises[file.split('.')[0]] = new Promise(function(resolve, reject) {
         fs.stat(url, function(err, stats) {
-          stats.location = url;
+          stats.location =`http://localhost:${config.port}/${file}`;
           resolve(stats);
           reject(err);
         });
@@ -220,8 +222,9 @@ class SaveMedia extends events.EventEmitter {
   }
 
   downloadImage(media) {
-    let src = media.title + path.extname(media.poster);
-    media.image = path.resolve(__dirname, '../../images/' + src);
+    const src = media.title + path.extname(media.poster);
+    const image_path = path.resolve(__dirname, '../../images/' + src);
+    media.image = `http://localhost:${config.port}/${src}`;
     let status = null;
     request
       .get(media.poster)
@@ -235,7 +238,7 @@ class SaveMedia extends events.EventEmitter {
         console.log('image error :'+ err.toString);
         throw new Error(err.toString);
       })
-      .pipe(fs.createWriteStream(media.image));
+      .pipe(fs.createWriteStream(image_path));
   }
   getFiles(folder_path) {
     return new Promise(function(resolve, reject) {

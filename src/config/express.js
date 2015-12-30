@@ -6,24 +6,24 @@ import morgan from 'morgan';
 import compress from 'compression';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
-import configs from './config';
+import config from './config';
 import routes from './routes';
+import cors from 'cors';
 
-// Define the Express configuration method
+  // Define the Express configuration method
 export default function app() {
-  //connect to mongoDb
-  let db_name = 'tv-test'
-    // Create a new Express application instance
+  // Create a new Express application instance
   let app = express();
   // Use the 'NDOE_ENV' variable to activate the 'morgan' logger or 'compress' middleware
   if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
   } else if (process.env.NODE_ENV === 'production') {
-    db_name = 'tv';
     app.use(compress());
     app.set('trust proxy', 1); // trust first proxy //hack for not being over https
   }
-  configs.dbOpen(db_name,()=>{
+  app.use(cors());
+  //connect to mongoDb
+  config.dbOpen(config.db, () => {
     console.log('connected to DB');
   });
   // Use the 'body-parser' and 'method-override' middleware functions
@@ -32,11 +32,12 @@ export default function app() {
   }));
   app.use(bodyParser.json());
   app.use(methodOverride());
-
   // Load the routing files
   routes(app);
   // Configure static file serving TODO
-  //app.use(express.static('./public'));
+  app.use(express.static('images'));
+  app.use(express.static('movies'));
+  app.listen(config.port);
   // Return the Express application instance
   return app;
 }

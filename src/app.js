@@ -10,7 +10,7 @@ import path from 'path';
 
 const movie_file_path = path.resolve(__dirname, '../movies');
 
-config.dbOpen('media', function() {
+config.dbOpen(config.db, function() {
   config.getEsClient(function() {
     try {
       tvEngine.saveData(movie_file_path, function() {
