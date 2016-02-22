@@ -12,7 +12,9 @@ $ npm install --save tv-engine
 ```
 
 ## Usage
-```js
+```
+  run npm run app to add media to database
+  TODO move movies to the media folder if not in media folder;
   TODO autocreate images and testData folder if not available
   TODO figure out why webpack not working
   TODO sci-fi genre needs to be worked on

@@ -3,5 +3,4 @@ coverage
 npm-debug.log
 dist
 testData
-images
-movies
+public

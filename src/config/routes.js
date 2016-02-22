@@ -8,5 +8,5 @@ const controller = new GetMedia();
 // Define the routes module' method
 export default function(app) {
   app.route('/api/search').post(controller.getByName);
-  app.route('/api/media').post(controller.getByTag);
+  app.route('/api/media').post(controller.getMediaData);
 }

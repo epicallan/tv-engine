@@ -37,12 +37,11 @@ export default class GetMedia {
     const query = {
       type: body.type,
       imdbRating: {
-        $gt: body.rating
+        $gt: body.rating || 0
       }
     };
-    if (body.genre !== undefined) {
-      query.genre = body.genre;
-    }
+    if (body.id !== undefined) query._id = body.id
+    if (body.genre !== undefined) query.genre = body.genre;
     const promise = Media.
     find(query).
     limit(12).
@@ -53,7 +52,7 @@ export default class GetMedia {
     return promise;
 
   }
-  getByTag(req, res) {
+  getMediaData(req, res) {
     GetMedia._getFromMongoDB(req.body).then((data) => {
       res.json(data);
     });

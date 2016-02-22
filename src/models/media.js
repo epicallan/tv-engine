@@ -1,9 +1,4 @@
 'use strict';
-
-/**
- * Module dependencies.
- */
-
 import uniqueValidator from 'mongoose-unique-validator';
 import mongoose from 'mongoose';
 import mongoosastic from 'mongoosastic';
@@ -14,27 +9,27 @@ const Schema = mongoose.Schema;
  * Media Schema
  */
  const MediaSchema = new Schema({
-   title: { type : String,trim : true, unique: true,es_indexed:true,es_boost:4.0},
-   year: { type : String, default : '', trim : true },
-   released: { type : String, default : '', trim : true },
-   runtime: { type : String, default : '', trim : true },
-   genre: { type : Number},
-   tags:{type: [String], default:[], trim:true},
-   director: { type : [String],default:[],es_indexed:true },
-   writer: { type : [String], default :[]},
-   actors: { type : [String],es_indexed:true,es_boost:2.0 },
-   plot: { type : String, default : '', trim : true },
-   language: { type : String, default : '', trim : true },
-   poster: { type : String, default : '', trim : true, unique: true  },
-   image: { type : String, default : '', trim : true },
-   imdbRating: { type : Number, default : 0},
-   type:Number,
-   downloads:Number,
-   createdAt:{ type : Date, default : Date.now },
-   location:String,
-   size:Number,
-   blksize:Number,
-   birthtime:String
+    title: { type : String,trim : true, unique: true,es_indexed:true,es_boost:4.0},
+    year: { type : String, default : '', trim : true },
+    released: { type : String, default : '', trim : true },
+    runtime: { type : String, default : '', trim : true },
+    genre: { type : Number},
+    tags:{type: [String], default:[], trim:true},
+    director: { type : [String],default:[],es_indexed:true },
+    writer: { type : [String], default :[]},
+    actors: { type : [String],es_indexed:true,es_boost:2.0 },
+    plot: { type : String, default : '', trim : true },
+    language: { type : String, default : '', trim : true },
+    poster: { type : String, default : '', trim : true, unique: true  },
+    image: { type : String, default : '', trim : true },
+    imdbRating: { type : Number, default : 0},
+    type:Number,
+    downloads:Number,
+    createdAt:{ type : Date, default : Date.now },
+    location:String,
+    size:Number,
+    blksize:Number,
+    birthtime:String
  });
 
 

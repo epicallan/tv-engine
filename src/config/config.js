@@ -12,7 +12,7 @@
      this.connection = null;
      this.esClient = null;
      this.settings = settings;
-     this.port = 3000;
+     this.port = 5000;
      process.env.NODE_ENV = process.env.NODE_ENV || 'development'
      if (process.env.NODE_ENV === 'development') {
        this.db = 'tv-dev';
