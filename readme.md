@@ -4,39 +4,34 @@
 [![Dependency Status][depstat-image]][depstat-url]
 
 > Description
+```npm run app``` will start a nodejs process that iterates through a movie or media
+folder to retrieve movie data (poster image, actor etc) from a movie database
+It will finally save the data in mongodb and elasticsearch.
+```npm start``` will start an express server that has routes/api end points for serving movie data
+to the client app [tv-chicken]: https://github.com/epicallan/tv-chicken  
 
 ## Installation
 
 ```
-$ npm install --save tv-engine
+$ npm install
 ```
 
 ## Usage
-```js
+```
+  run npm run app to add media to database
+  TODO move movies to the media folder if not in media folder;
   TODO autocreate images and testData folder if not available
-  TODO figure out why webpack not working
-  var tvEngine = require('tv-engine');
+  TODO figure out why webpack is not working
+  TODO sci-fi genre needs to be worked on
+  TODO utility that looks through a movie folder and gets the movie in it excluding samples
 ```
 ## Search
 
 ```
-we are using elasticsearch for search, the search feature doesnt respect movie rating
+we are using elasticsearch for search, the search feature doesn't respect movie rating
 the filter feature respects rating and its done by mongodb
 
 ```
-
-## API
-
-### `tvEngine(data, [options])`
-Description
-
-#### Parameters
-- **Array** `data`: An array of data
-- **Object** `options`: An object containing the following fields:
-
-#### Return
-- **Array** - Result
-
 ## License
 MIT © [Allan](http://github.com/epicallan)
 
