@@ -5,7 +5,7 @@
 
 > Description
 ```npm run app``` will start a nodejs process that iterates through a movie or media
-folder to retrieve movie data (poster image, actor etc) from a movie database
+folder to retrieve movie data (poster image, actor etc) from a movie database api such as omdb
 It will finally save the data in mongodb and elasticsearch.
 ```npm start``` will start an express server that has routes/api end points for serving movie data
 to the client app [tv-chicken]: https://github.com/epicallan/tv-chicken  
