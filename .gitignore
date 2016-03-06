@@ -4,3 +4,4 @@ npm-debug.log
 dist
 testData
 public
+.DS_Store

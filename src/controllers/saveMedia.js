@@ -22,7 +22,7 @@ import config from '../config/config';
 bluebird.promisifyAll(redis.RedisClient.prototype);
 bluebird.promisifyAll(redis.Multi.prototype);
 import events from 'events';
-import os from 'os';
+// import os from 'os';
 
 String.prototype.lowerCaseFirstLetter = function() {
   return this.charAt(0).toLowerCase() + this.slice(1)
@@ -32,7 +32,7 @@ class SaveMedia extends events.EventEmitter {
 
   constructor() {
     super()
-    console.log(os.hostname());
+    //console.log(os.hostname());
     this.dir = null;
     this.genres = config.settings.genres;
     this.types = config.settings.types;
@@ -59,7 +59,7 @@ class SaveMedia extends events.EventEmitter {
       let file_names = files.map(file => file.split('.')[0]);
       //get  series or movie media details from IMDB as a list of promises
       const movie_detail_promises = this.getMovieDetails(file_names);
-      //get file properties eg file size as promise objects witth file names as keys
+      //get file properties eg file size as promise objects with file names as keys
       _.forIn(this.getFileProperties(files), (promise, key) => {
         //temporary save file stats to redis TODO could use generators so that once
         //the network call from imdb returns with an obj, the stats obj can be retrieved and
@@ -223,7 +223,7 @@ class SaveMedia extends events.EventEmitter {
 
   downloadImage(media) {
     const src = media.title + path.extname(media.poster);
-    const image_path = path.resolve(__dirname, '../../images/' + src);
+    const image_path = path.resolve(__dirname, `../../${config.IMAGE_FOLDER}/${src}`);
     media.image = `http://localhost:${config.port}/${src}`;
     let status = null;
     request

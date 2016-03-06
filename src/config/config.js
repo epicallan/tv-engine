@@ -13,6 +13,8 @@
      this.esClient = null;
      this.settings = settings;
      this.port = 5000;
+     this.MEDIA_FOLDER = 'public/movies';
+     this.IMAGE_FOLDER = 'public';
      process.env.NODE_ENV = process.env.NODE_ENV || 'development'
      if (process.env.NODE_ENV === 'development') {
        this.db = 'tv-dev';
